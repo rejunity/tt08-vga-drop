@@ -1,6 +1,11 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
-# Tiny Tapeout Verilog Project Template
+# Useful links
+
+* VGA PMOD [https://github.com/mole99/tiny-vga]
+* Audio PMOD (7th pin PWM) [https://github.com/MichaelBell/tt-audio-pmod?tab=readme-ov-file]
+* VGA timing [http://www.tinyvga.com/vga-timing/640x480@60Hz]
+
 
 - [Read the documentation for project](docs/info.md)
 
