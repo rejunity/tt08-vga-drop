@@ -117,6 +117,6 @@ module tt_um_rejunity_vga_test01 (
 
   // TinyVGA PMOD
   //assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
-  assign uo_out = {hsync, counter[5:3] & video_active, vsync, counter[2:0] & video_active};
+  assign uo_out = {hsync, counter[7:5] & video_active, vsync, counter[2:0] & video_active};
 
 endmodule
