@@ -81,7 +81,7 @@ module tt_um_rejunity_vga_test01 (
 );
 
   // All output pins must be assigned. If not used, assign to 0.
-  assign uo_out  = 0;
+
   assign uio_out = 0;
   assign uio_oe  = 8'b1111_1111;
 
@@ -89,11 +89,34 @@ module tt_um_rejunity_vga_test01 (
   wire _unused = &{ena, clk, rst_n, 1'b0};
   wire _unused_inputs = &{ui_in, uio_in, 8'b0};
 
+  wire hsync;
+  wire vsync;
+
+  wire video_active;
+  wire [9:0] screen_x;
+  wire [9:0] screen_y;
+
   hvsync_generator hvsync_gen(
     .clk(clk),
     .reset(~rst_n),
-    .hsync(uo_out[7]),
-    .vsync(uo_out[3])
+    .hsync(hsync),
+    .vsync(vsync),
+    .display_on(video_active),
+    .hpos(screen_x),
+    .vpos(screen_y)
   );
+
+  reg [7:0] counter;
+
+  always @(posedge clk) begin
+    if (~rst_n) begin
+      counter <= 0;
+    end else
+      counter <= counter + 1;
+  end
+
+  // TinyVGA PMOD
+  //assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
+  assign uo_out = {hsync, counter[5:3] & video_active, vsync, counter[2:0] & video_active};
 
 endmodule
