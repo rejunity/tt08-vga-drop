@@ -92,31 +92,91 @@ module tt_um_rejunity_vga_test01 (
   wire hsync;
   wire vsync;
 
-  wire video_active;
-  wire [9:0] screen_x;
-  wire [9:0] screen_y;
+  wire activevideo;
+  wire [9:0] x;
+  wire [9:0] y;
 
   hvsync_generator hvsync_gen(
     .clk(clk),
     .reset(~rst_n),
     .hsync(hsync),
     .vsync(vsync),
-    .display_on(video_active),
-    .hpos(screen_x),
-    .vpos(screen_y)
+    .display_on(activevideo),
+    .hpos(x),
+    .vpos(y)
   );
 
-  reg [7:0] counter;
+  // reg [7:0] counter;
 
-  always @(posedge clk) begin
+  // always @(posedge clk) begin
+  //   if (~rst_n) begin
+  //     counter <= 0;
+  //   end else
+  //     counter <= counter + 1;
+  // end
+
+  // // TinyVGA PMOD
+  // //assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
+  // assign uo_out = {hsync, counter[7:5] & video_active, vsync, counter[2:0] & video_active};
+
+
+
+
+
+  reg signed [9:0] p_x = x - 9'd320;
+  reg signed [9:0] p_y = y - 9'd240;
+
+  wire signed [31:0] dot = (p_x * p_x + p_y * p_y) >> 6; //(p_x[7:0] * p_x[7:0] + p_y[7:0] * p_y[7:0]) >> 6;
+  wire signed [31:0] dot_ = dot;//+ frame;
+
+  wire signed [10:0] frame = frame_counter[6:0];
+
+  wire signed [31:0] pp_x = ((dot_ * (p_x > 0 ? p_x : -p_x)) >> 6) - frame;
+  wire signed [31:0] pp_y = ((dot_ * (p_y > 0 ? p_y : -p_y)) >> 6) - frame;
+
+  wire signed [31:0] dot2 = (pp_x * pp_x + pp_y * pp_y) >> 6; //(p_x[7:0] * p_x[7:0] + p_y[7:0] * p_y[7:0]) >> 6;
+  wire signed [31:0] dot2_ = dot2;
+
+  wire signed [31:0] ppp_x = ((dot2_ * (pp_x > 0 ? pp_x : -pp_x)) >> 6) - frame;
+  wire signed [31:0] ppp_y = ((dot2_ * (pp_y > 0 ? pp_y : -pp_y)) >> 6) - frame;
+
+  // wire [8:0] pp_x = dot[7:0] + p_x[8:0] - frame;
+  // wire [8:0] pp_y = dot[7:0] + p_y[8:0] - frame;
+
+  // wire [8:0] dot2 = (pp_x * pp_x + pp_y * pp_y)>>4;
+
+  // wire [8:0] ppp_x = dot2 + pp_x - frame;
+  // wire [8:0] ppp_y = dot2 + pp_y - frame;
+
+  // wire [7:0] ppp_x = dot2 * pp_x[8-:8] - frame;
+  // wire [7:0] ppp_y = dot2 * pp_y[8-:8] - frame;
+
+  // wire [31:0] ppp_x = pp_x;
+  // wire [31:0] ppp_y = pp_y;
+
+  // assign R = activevideo ? { ppp_x[5-:2] } : 2'b00;
+  // assign G = activevideo ? { ppp_y[5-:2] } : 2'b00;
+  // assign B = activevideo ? { ppp_y[5-:2] } : 2'b00;
+
+
+  wire [1:0] R;
+  wire [1:0] G;
+  wire [1:0] B;
+
+  assign R = activevideo ? { (ppp_x > 8'd210) * 2'b11 } : 2'b00;
+  assign G = activevideo ? { (ppp_x > 8'd250) * 2'b11 } : 2'b00;
+  assign B = activevideo ? { (ppp_y > 8'd270) * 2'b11 } : 2'b00;
+
+  reg [11:0] frame_counter;
+  always @(posedge vsync) begin
     if (~rst_n) begin
-      counter <= 0;
-    end else
-      counter <= counter + 1;
+      frame_counter <= 0;
+    end else begin
+      frame_counter <= frame_counter + 1;
+    end
   end
 
   // TinyVGA PMOD
-  //assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
-  assign uo_out = {hsync, counter[7:5] & video_active, vsync, counter[2:0] & video_active};
+  assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
 
 endmodule

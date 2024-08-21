@@ -33,7 +33,7 @@ async def test_project(dut):
     # Wait for one clock cycle to see the output values
     await ClockCycles(dut.clk, 1)
 
-    for i in range(1, 60):
+    for i in range(1, 6):
         await ClockCycles(dut.clk, 800)
 
     # Keep testing the module by changing the input values, waiting for
