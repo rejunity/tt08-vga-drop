@@ -2,8 +2,8 @@
 project:
   title:        "VGA test"      # Project title
   author:       "rejunity"      # Your name
-  discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
+  discord:      "ReJ"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
+  description:  "We are learning VGA here and sky130"
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     25200000       # Clock frequency in Hz for VGA timing
 
