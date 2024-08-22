@@ -124,15 +124,16 @@ module tt_um_rejunity_vga_test01 (
 
 
 
-  wire signed [9:0] frame = frame_counter[6:0]; // for A&B combined try to have frame_counter[7:0] when A&B==1
-  wire signed [9:0] p_x = x - 9'd320 - frame/2;
-  wire signed [9:0] p_y = y - 9'd240 - frame;
+  wire signed [9:0] frame = frame_counter[6:0];
+  wire signed [9:0] p_x = x - 9'd320 - frame/2; // frame_counter[6:1]
+  wire signed [9:0] p_y = y - 9'd240 - frame;   // frame_counter[6:0]
 
   wire signed [22:0] dot = ((p_x * p_x + p_y * p_y*2) * (130-frame)) >> (9+frame[6:5]);
   wire [7:0] pp_x = dot;
   wire [7:0] pp_y = dot;
 
-  wire signed [22:0] dot2 = ((pp_x * pp_x * 8) * frame) >> 18;
+  wire zoom_mode = (frame_counter[7] & frame_counter[8]);
+  wire signed [22:0] dot2 = ((pp_x * pp_x * 8) * frame) >> (18 - 2*zoom_mode);
   wire [7:0] ppp_x = dot2;
 
   // A
@@ -141,8 +142,10 @@ module tt_um_rejunity_vga_test01 (
   // wire [7:0] ppp_y = dot2 + p_y*frame_counter[7] - p_x/2*frame_counter[7];
 
   // A & B combined
-  wire [7:0] ppp_y = dot2 + p_y*frame_counter[8] - p_x/2*frame_counter[8] +
-                            p_y*(frame[7:5]+1'd1) * frame_counter[7] - p_x * (frame[6:5]+1'd1) * frame_counter[7];
+  wire mode_a = frame_counter[8];
+  wire mode_b = frame_counter[7]^frame_counter[8];
+  wire [7:0] ppp_y = dot2 + p_y*mode_a - p_x/2*mode_a +
+                            p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1) * mode_b;
 
 
   assign R = activevideo ? { ppp_x[7-:2] } : 2'b00;
