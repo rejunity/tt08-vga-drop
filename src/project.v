@@ -92,7 +92,7 @@ module tt_um_rejunity_vga_test01 (
   wire hsync;
   wire vsync;
 
-  wire activevideo;
+  wire video_active;
   wire [9:0] x;
   wire [9:0] y;
   wire [1:0] R;
@@ -104,7 +104,7 @@ module tt_um_rejunity_vga_test01 (
     .reset(~rst_n),
     .hsync(hsync),
     .vsync(vsync),
-    .display_on(activevideo),
+    .display_on(video_active),
     .hpos(x),
     .vpos(y)
   );
@@ -123,12 +123,52 @@ module tt_um_rejunity_vga_test01 (
   // assign uo_out = {hsync, counter[7:5] & video_active, vsync, counter[2:0] & video_active};
 
 
-
   wire signed [9:0] frame = frame_counter[6:0];
-  wire signed [9:0] p_x = x - 9'd320 - frame/2; // frame_counter[6:1]
-  wire signed [9:0] p_y = y - 9'd240 - frame;   // frame_counter[6:0]
+  wire signed [9:0] offset_x = frame/2; 
+  wire signed [9:0] offset_y = frame; 
+  wire signed [9:0] center_x = 10'sd320+offset_x;
+  wire signed [9:0] center_y = 10'sd240+offset_y;
+  wire signed [9:0] p_x = x - center_x;
+  wire signed [9:0] p_y = y - center_y;
 
-  wire signed [22:0] dot = ((p_x * p_x + p_y * p_y*2) * (130-frame)) >> (9+frame[6:5]);
+  reg signed [22:0] r1;
+  reg signed [22:0] r2;
+  wire signed [22:0] r = 2*(r1 - center_y*2) + r2 - center_x*2;
+  always @(posedge clk) begin
+    if (~rst_n) begin
+      //r <= 0;
+      r1 <= 0;
+      r2 <= 0;
+    end else begin
+      if (vsync) begin
+        r1 <= 0;
+        r2 <= 0;
+      end
+
+      if (video_active & y == 0) begin
+        // no mul optimisation, equivalent to:
+        //   r1 <= center_y*center_y;
+        if (x < center_y)
+          r1 <= r1 + center_y;
+      end else if (x == 640) begin
+        // need to calculate (320+offset)^2
+        // (320+offset) * (320+offset) = 320*320 + 2*320*offset + offset*offset
+        r2 <= 320*320;
+      end else if (x > 640) begin
+        // remainder of (320+offset)^2 from above ^^^
+        //    2*320*offset + offset*offset
+        if (x-640 <= offset_x)
+          r2 <= r2 + 2*320 + offset_x;
+      end else if (video_active & x == 0) begin
+        r1 <= r1 + 2*p_y + 1;
+      end else if (video_active) begin
+        r2 <= r2 + 2*p_x + 1;
+      end
+    end
+  end
+
+  // wire signed [22:0] dot = ((p_x * p_x + p_y * p_y*2) * (130-frame)) >> (9+frame[6:5]);
+    wire signed [22:0] dot = (r * (130-frame)) >> (9+frame[6:5]);
   wire [7:0] pp_x = dot;
   wire [7:0] pp_y = dot;
 
@@ -148,13 +188,13 @@ module tt_um_rejunity_vga_test01 (
                             p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1) * mode_b;
 
 
-  assign R = activevideo ? { ppp_x[7-:2] } : 2'b00;
-  assign G = activevideo ? { ppp_y[5-:2] } : 2'b00;
-  assign B = activevideo ? { ppp_y[3-:2] } : 2'b00;
+  assign R = video_active ? { ppp_x[7-:2] } : 2'b00;
+  assign G = video_active ? { ppp_y[5-:2] } : 2'b00;
+  assign B = video_active ? { ppp_y[3-:2] } : 2'b00;
 
-  // assign R = activevideo ? { (ppp_x > 8'd200) * 2'b11 } : 2'b00;
-  // assign G = activevideo ? { (ppp_x > 8'd200) * 2'b11 } : 2'b00;
-  // assign B = activevideo ? { (ppp_y > 8'd200) * 2'b11 } : 2'b00;
+  // assign R = video_active ? { (ppp_x > 8'd200) * 2'b11 } : 2'b00;
+  // assign G = video_active ? { (ppp_x > 8'd200) * 2'b11 } : 2'b00;
+  // assign B = video_active ? { (ppp_y > 8'd200) * 2'b11 } : 2'b00;
 
   reg [11:0] frame_counter;
   always @(posedge vsync) begin
