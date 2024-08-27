@@ -118,9 +118,9 @@ module tt_um_rejunity_vga_test01 (
   wire signed [9:0] p_x = x - center_x;
   wire signed [9:0] p_y = y - center_y;
 
-  reg signed [22:0] r1;
-  reg signed [22:0] r2;
-  wire signed [22:0] r = 2*(r1 - center_y*2) + r2 - center_x*2 + 2;
+  reg signed [17:0] r1;                                         // was 23 bit
+  reg signed [18:0] r2;                                         // was 23 bit
+  wire signed [19:0] r = 2*(r1 - center_y*2) + r2 - center_x*2; // was 23 bit
   always @(posedge clk) begin
     if (~rst_n) begin
       //r <= 0;
