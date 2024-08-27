@@ -136,6 +136,7 @@ module tt_um_rejunity_vga_test01 (
   wire signed [22:0] r = 2*(r1 - center_y*2) + r2 - center_x*2;
   always @(posedge clk) begin
     if (~rst_n) begin
+      frame_counter <= 60*5;
       //r <= 0;
       r1 <= 0;
       r2 <= 0;
@@ -198,11 +199,7 @@ module tt_um_rejunity_vga_test01 (
 
   reg [11:0] frame_counter;
   always @(posedge vsync) begin
-    if (~rst_n) begin
-      frame_counter <= 0;
-    end else begin
       frame_counter <= frame_counter + 1;
-    end
   end
 
 
