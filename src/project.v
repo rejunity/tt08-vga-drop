@@ -109,6 +109,7 @@ module tt_um_rejunity_vga_test01 (
     .vpos(y)
   );
 
+
   wire signed [9:0] frame = frame_counter[6:0];
   wire signed [9:0] offset_x = frame/2; 
   wire signed [9:0] offset_y = frame; 
@@ -185,9 +186,9 @@ module tt_um_rejunity_vga_test01 (
 
   reg [11:0] frame_counter;
   always @(posedge vsync) begin
-      frame_counter <= frame_counter + 1;
+      if (~rst_n) begin end else
+        frame_counter <= frame_counter + 1;
   end
-
 
   // TinyVGA PMOD
   assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
