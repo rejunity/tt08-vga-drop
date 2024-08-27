@@ -123,7 +123,6 @@ module tt_um_rejunity_vga_test01 (
   wire signed [22:0] r = 2*(r1 - center_y*2) + r2 - center_x*2;
   always @(posedge clk) begin
     if (~rst_n) begin
-      frame_counter <= 60*5;
       //r <= 0;
       r1 <= 0;
       r2 <= 0;
@@ -185,9 +184,19 @@ module tt_um_rejunity_vga_test01 (
   // assign B = video_active ? { (ppp_y > 8'd200) * 2'b11 } : 2'b00;
 
   reg [11:0] frame_counter;
-  always @(posedge vsync) begin
-      if (~rst_n) begin end else
+  // always @(posedge vsync) begin
+  //  if (~rst_n) begin end else
+  //    frame_counter <= frame_counter + 1;
+  // end
+
+  always @(posedge clk) begin
+    if (~rst_n) begin
+      frame_counter <= 60*5;
+    end else begin
+      if (vsync) begin
         frame_counter <= frame_counter + 1;
+      end
+    end
   end
 
   // TinyVGA PMOD
