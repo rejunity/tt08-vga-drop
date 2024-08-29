@@ -110,11 +110,11 @@ module tt_um_rejunity_vga_test01 (
   );
 
 
-  wire signed [9:0] frame = frame_counter[6:0];
-  wire signed [9:0] offset_x = frame/2; 
-  wire signed [9:0] offset_y = frame; 
-  wire signed [9:0] center_x = 10'sd320+offset_x;
-  wire signed [9:0] center_y = 10'sd240+offset_y;
+  wire /*signed*/ [9:0] frame = frame_counter[6:0];
+  wire /*signed*/ [9:0] offset_x = frame/2; 
+  wire /*signed*/ [9:0] offset_y = frame; 
+  wire /*signed*/ [9:0] center_x = 10'sd320+offset_x;
+  wire /*signed*/ [9:0] center_y = 10'sd240+offset_y;
   wire signed [9:0] p_x = x - center_x;
   wire signed [9:0] p_y = y - center_y;
 
@@ -155,13 +155,13 @@ module tt_um_rejunity_vga_test01 (
   end
 
   // wire signed [22:0] dot = ((p_x * p_x + p_y * p_y*2) * (128-frame)) >> (9+frame[6:5]);
-    wire signed [22:0] dot = (r * (128-frame)) >> (9+frame[6:5]);
+    wire /*signed*/ [22:0] dot = (r * (128-frame)) >> (9+frame[6:5]);
   wire [7:0] pp_x = dot;
   wire [7:0] pp_y = dot;
 
   wire zoom_mode = (frame_counter[7] & frame_counter[8]);
   // wire signed [22:0] dot2 = ((pp_x * pp_x * 8) * frame) >> (18 - 2*zoom_mode);
-  wire signed [22:0] dot2 = ((pp_x * pp_x) * frame) >> (15 - 2*zoom_mode);
+  wire /*signed*/ [22:0] dot2 = ((pp_x * pp_x) * frame) >> (15 - 2*zoom_mode);
   wire [7:0] ppp_x = dot2;
 
   // A
