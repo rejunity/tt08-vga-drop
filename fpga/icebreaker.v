@@ -145,40 +145,18 @@ module top (
         .rst_n(BTN_N)
     );
 
-    // hvsync_generator vga_sync(
-    //     .clk(clk_pixel),
-    //     .reset(~BTN_N),
-    //     .hsync(h_sync),
-    //     .vsync(v_sync),
-    //     .display_on(is_display_area),
-    //     .hpos(counter_h),
-    //     .vpos(counter_v)
-    // );
-
-    // vga_sync_generator vga_sync(
-    //     .clk(clk_pixel),
-    //     .h_sync(h_sync),
-    //     .v_sync(v_sync),
-    //     .is_display_area(is_display_area),
-    //     .counter_h(counter_h),
-    //     .counter_v(counter_v)
-    // );
-
+    // dummy tests
     wire pixel_r = is_display_area & counter_h[4];
     wire pixel_g = is_display_area & counter_h[2];
     wire pixel_b = is_display_area & counter_h[3];
-    // wire [3:0] out = counter_h[5:2] * is_display_area * counter_h[0] * counter_v[3];
-    // wire [11:0] pixel_rgb = (counter_h*0 + counter_v) * is_display_area;
     wire [11:0] pixel_rgb = {counter_h[7:4], counter_v[7:4], 4'h4} * is_display_area;
-    // wire [11:0] pixel_rgb = {4'hF*(1-BTN1), 4'hF*BTN2, 4'hF*BTN3} * is_display_area;
-
 
 `ifdef VGA_6BPP
     // VGA 6bpp
-    // {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
     assign {
             vga_6bpp_hsync, vga_6bpp_b[0], vga_6bpp_g[0], vga_6bpp_r[0],
-            vga_6bpp_vsync, vga_6bpp_b[1], vga_6bpp_g[1], vga_6bpp_r[1]} = demo_out_pmod1 ^ BTN1 * (demo_out_pmod2[0] * 8'b0111_0111);
+            vga_6bpp_vsync, vga_6bpp_b[1], vga_6bpp_g[1], vga_6bpp_r[1]} = demo_out_pmod1
+                                                                         ^ BTN1 * (demo_out_pmod2[0] * 8'b0111_0111);
 
     assign pmod_1b = demo_out_pmod2;
 
