@@ -82,7 +82,6 @@ module tt_um_rejunity_vga_test01 (
 
   // All output pins must be assigned. If not used, assign to 0.
 
-  assign uio_out = 0;
   assign uio_oe  = 8'b1111_1111;
 
   // List all unused inputs to prevent warnings
@@ -98,6 +97,7 @@ module tt_um_rejunity_vga_test01 (
   wire [1:0] R;
   wire [1:0] G;
   wire [1:0] B;
+  wire audio;
 
   hvsync_generator hvsync_gen(
     .clk(clk),
@@ -172,30 +172,75 @@ module tt_um_rejunity_vga_test01 (
   // A & B combined
   wire mode_a = frame_counter[8];
   wire mode_b = frame_counter[7]^frame_counter[8];
-  wire [7:0] ppp_y = dot2 + p_y*mode_a - p_x/2*mode_a +
+  // wire [7:0] ppp_y = dot2 + p_y*mode_a - p_x/2*mode_a +
+  //                           p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1) * mode_b;
+  wire [7:0] p_p =          p_y*mode_a - p_x/2*mode_a +
                             p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1) * mode_b;
 
+  wire [7:0] ppp_y = frame_counter[8:7] == 2? 
+                      -(y & 8'h7f & p_x) + (r>>11):
+                        dot2 + p_p;
 
-  assign R = video_active ? { ppp_x[7-:2] } : 2'b00;
-  assign G = video_active ? { ppp_y[5-:2] } : 2'b00;
-  assign B = video_active ? { ppp_y[3-:2] } : 2'b00;
+  wire [2:0] part = frame_counter[9-:3];
+  assign {R,G,B} =
+    (~video_active) ? 6'b00_00_00 :
+    // (part == 2) ? { (&ppp_y[5:2]) * ppp_y[1-:2], 1'b0, &ppp_y[5:3] * ppp_y[0], 2'b00 } : // red/golden serpinsky
+    // (part == 2) ? { (&ppp_y[5:2]) * ppp_y[1-:2], (&ppp_y[5:2]) * ppp_y[0], 3'b000 } : // red/golden serpinsky
+    part == 2 ? { &ppp_y[5:2] * ppp_y[1-:2], &ppp_y[6:0] * ppp_y[1-:2], 2'b00 }: // red/golden serpinsky
+    (part == 6) ? { ppp_y[7-:2], ppp_y[6-:2], ppp_y[5-:2] } :     // colored serpinsky
+    (part == 1) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } : // red lines
+    (part == 0) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } : //+6'b110001
+    // //               // 4'b1000 * (ppp_y > 200), ppp_y[6:5] };
+
+                // { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
+                { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
+
+
+
+  // assign R = video_active ? (&ppp_y[7:3]) * ppp_y[2-:2] : 2'b00; <-- deformed sierkpinsky 
+  // assign R = video_active ? (&ppp_y[5:3]) * ppp_y[1-:2] : 2'b00; <-- deformed sierkpinsky 2
+  // assign R = video_active ? &ppp_y[5:3] : 2'b00;//video_active ? { ppp_x[7-:2] + ppp_y[5-:2]} : 2'b00;
+  // assign G = video_active ? ppp_y[7-:2]*0 : 2'b00;
+  // assign B = video_active ? ppp_y[7-:2]*0 : 2'b00;
+
+  // assign R = video_active ? { ppp_x[7-:2] + ppp_y[5-:2]} : 2'b00;
+  // assign G = video_active ? { ppp_y[5-:2] } : 2'b00; // works bettter for combined A&B: ppp_y[7-:2]
+  // assign B = video_active ? { ppp_y[3-:2] } : 2'b00;
+  
+  // assign R = video_active ? { ppp_x[7-:2] } : 2'b00;
+  // assign G = video_active ? { ppp_y[5-:2] } : 2'b00;
+  // assign B = video_active ? { ppp_y[3-:2] } : 2'b00;
 
   // assign R = video_active ? { (ppp_x > 8'd200) * 2'b11 } : 2'b00;
   // assign G = video_active ? { (ppp_x > 8'd200) * 2'b11 } : 2'b00;
   // assign B = video_active ? { (ppp_y > 8'd200) * 2'b11 } : 2'b00;
 
+  // assign R = video_active ? ppp_x[4:3]  : 2'b00;
+  // assign G = video_active ? ppp_x[2:1]  : 2'b00;
+  // assign B = video_active ? ppp_y[4:3]  : 2'b00;
+
+  // assign R = video_active ? frame_counter[4:3]  : 2'b00;
+  // assign G = video_active ? frame_counter[2:1]  : 2'b00;
+  // assign B = video_active ? frame_counter[3:2]  : 2'b00;
+
+  assign audio = 1'b0;
+
   reg [11:0] frame_counter;
+  reg frame_counter_frac;
   always @(posedge clk) begin
     if (~rst_n) begin
-      frame_counter <= 60*5;
+      frame_counter <= 0;
+      frame_counter_frac <= 0;
     end else begin
-      if (vsync) begin
-        frame_counter <= frame_counter + 1;
+      if (x == 0 && y == 0) begin
+        {frame_counter, frame_counter_frac} <= {frame_counter,frame_counter_frac} + 1;
       end
     end
   end
 
   // TinyVGA PMOD
   assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
+  // TinyAudio PMOD
+  assign uio_out = {8{audio}};
 
 endmodule
