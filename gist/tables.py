@@ -8,9 +8,13 @@ exp5 = np.exp(np.linspace(0,1,60) * -5.0) * 255.
 exp10 = np.exp(np.linspace(0,1,60) * -10.0) * 255.
 exp20 = np.exp(np.linspace(0,1,60) * -20.0) * 255.
 
-print("exp -5.0",  exp5[1]/exp5[0],   "\n", exp5.astype(int),  "\n", exp5.astype(int)[0:29])
-print("exp -10.0", exp10[1]/exp10[0], "\n", exp10.astype(int), "\n", exp10.astype(int)[0:29])
-print("exp -20.0", exp20[1]/exp20[0], "\n", exp20.astype(int), "\n", exp20.astype(int)[0:14])
+
+print("exp -5.0",  exp5[1]/exp5[0],    np.where(exp5 < exp5[-1]+1)[0][0], "\n", \
+      exp5.astype(int),  "\n", exp5.astype(int)[0:29])
+print("exp -10.0", exp10[1]/exp10[0], np.where(exp10 < exp10[-1]+1)[0][0], "\n", \
+      exp10.astype(int), "\n", exp10.astype(int)[0:29])
+print("exp -20.0", exp20[1]/exp20[0], np.where(exp20 < exp20[-1]+1)[0][0], "\n", \
+      exp20.astype(int), "\n", exp20.astype(int)[0:14])
 
 #   tx = floor(tx*60.*4.)/(60.*4.);
 #   float tseq = mod(tx * 16.0, 16.0);
