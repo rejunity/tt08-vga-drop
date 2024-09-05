@@ -121,11 +121,15 @@ module tt_um_rejunity_vga_test01 (
   reg signed [17:0] r1;                                               // was 23 bit
   reg signed [18:0] r2;                                               // was 23 bit
   wire signed [19:0] r = 2*(r1 - center_y*2) + r2 - center_x*2 + 2;   // was 23 bit
+
+  reg signed [13:0] title_r;
+  reg [5:0] title_r_pixels_in_scanline;
+
   always @(posedge clk) begin
     if (~rst_n) begin
-      //r <= 0;
       r1 <= 0;
       r2 <= 0;
+      title_r <= 0;
     end else begin
       if (vsync) begin
         r1 <= 0;
@@ -151,12 +155,24 @@ module tt_um_rejunity_vga_test01 (
       end else if (video_active) begin
         r2 <= r2 + 2*p_x + 1;
       end
+
+      // circle for title
+      if (!video_active & y[6:0] == 0) begin
+        title_r <= 64*64+64*64;
+      end else if (x == 640) begin
+        title_r <= title_r + 2*(y[6:0]-64)+1 - 64*2;
+        title_r_pixels_in_scanline <= 0;
+      end else if (x > 640 && x < 640+128) begin
+        title_r <= title_r + 2*(x[6:0]-64)+1;
+        if (x > 640+64 & title_r < 60*60)
+          title_r_pixels_in_scanline <= title_r_pixels_in_scanline + 1; // count pixels in circle for each scanline
+      end
     end
   end
 
   // wire signed [22:0] dot = ((p_x * p_x + p_y * p_y*2) * (128-frame)) >> (9+frame[6:5]);
-  wire signed [22:0] dot = (r * (128-frame)) >> (9+frame[6:5]);
-  // wire signed [22:0] dot = (r * (128-frame)) >> (9+((frame[6:4]+1)>>1) );  // zoom on snare
+  // wire signed [22:0] dot = (r * (128-frame)) >> (9+frame[6:5]);
+  wire signed [22:0] dot = (r * (128-frame)) >> (9+((frame[6:4]+1)>>1) );  // zoom on snare
   // wire signed [22:0] dot = (r * (128-frame)) >> (9+(frame[6:4]-(~frame[4])));  // zoom on snare
   wire [7:0] pp_x = dot;
   wire [7:0] pp_y = dot;
@@ -183,6 +199,16 @@ module tt_um_rejunity_vga_test01 (
                       -(y & 8'h7f & p_x) + (r>>11):
                         dot2 + p_p;
 
+  // generate title pixels
+  wire ringR = y[9:7] == 3'b010 & |x[9:7] & (x[6:0] < title_r_pixels_in_scanline) &
+      ~(y > 256+70 & y < 256+128 & (x >= 256 & x < 256+64));
+  wire ringL = y[9:7] == 3'b010 & x[9:7] == 3'b010 & (~x[6:0] < title_r_pixels_in_scanline);
+  // .DDRR.OPP. => column on every odd 64 pixel sections except 0, 5 and 8th
+  // 012345678 
+  wire columns = y > 256+4 & y < 256+124 & x[6] & x[8:6] != 5 & ~x[9];
+  wire tails = y > 256+64 & y < 256+128+16 & x >= 256+256-64 & x < 256+256;
+
+
   wire [2:0] part = frame_counter[9-:3];
   assign {R,G,B} =
     (~video_active) ? 6'b00_00_00 :
@@ -193,7 +219,7 @@ module tt_um_rejunity_vga_test01 (
     (part == 1) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } : // red lines
     (part == 0) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } : //+6'b110001
     // //               // 4'b1000 * (ppp_y > 200), ppp_y[6:5] };
-
+    (part == 5) ? { &ppp_y[5:2] | ringR | ringL | columns | tails ? 6'b111_111 : 6'b0 } : 
                 // { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
                 { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
 
