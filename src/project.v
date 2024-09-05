@@ -157,6 +157,7 @@ module tt_um_rejunity_vga_test01 (
   // wire signed [22:0] dot = ((p_x * p_x + p_y * p_y*2) * (128-frame)) >> (9+frame[6:5]);
   wire signed [22:0] dot = (r * (128-frame)) >> (9+frame[6:5]);
   // wire signed [22:0] dot = (r * (128-frame)) >> (9+((frame[6:4]+1)>>1) );  // zoom on snare
+  // wire signed [22:0] dot = (r * (128-frame)) >> (9+(frame[6:4]-(~frame[4])));  // zoom on snare
   wire [7:0] pp_x = dot;
   wire [7:0] pp_y = dot;
 
@@ -225,18 +226,38 @@ module tt_um_rejunity_vga_test01 (
   // assign B = video_active ? frame_counter[3:2]  : 2'b00;
 
   wire [12:0] timer = {frame_counter, frame_counter_frac};
-  reg noise, noise_ = ^r1;
-  reg [2:0] note;
+  reg noise, noise_src = ^r1;
+  reg [2:0] noise_counter;
 
   wire square60hz = y < 255;                  // 60Hz square wave
-  wire [4:0] envelopeA = 5'd31 - timer[4:0];  // exp(t*-10) decays to 0 approximately in 32 frames
-  wire [4:0] envelopeB = 5'd31 - timer[3:0]*2;// exp(t*-20) decays to 0 approximately in 16 frames
-                        // |timer[3:2] ? 5'd0:5'd31; // pulse for 8 frames
+  wire [4:0] envelopeA = 5'd31 - timer[4:0];  // exp(t*-10) decays to 0 approximately in 32 frames  [255 215 181 153 129 109  92  77  65  55  46  39  33  28  23  20  16  14 12  10   8   7   6   5   4   3   3   2   2]
+  wire [4:0] envelopeB = 5'd31 - timer[3:0]*2;// exp(t*-20) decays to 0 approximately in 16 frames  [255 181 129  92  65  46  33  23  16  12   8   6   4   3]
+  wire       envelopeP8 = (|timer[3:2])*5'd31;// pulse for 8 frames
   wire beats_1_3 = timer[5:4] == 2'b10;
 
-  wire kick   = square60hz & (x < envelopeA);  // 60Hz square wave with half second envelope
-  wire snare  = noise      & (x >= 32 && x < 32+envelopeB);  // 60Hz square wave with half second envelope
-  assign audio = { kick | (snare & beats_1_3) };
+
+  // melody notes: 151  26  40  60 _ 90 143  23  35
+  // x1.5 wrap-around progression
+  reg [8:0] note_freq;
+  reg [8:0] note_counter;
+  reg       note;
+  wire [2:0] note_in = timer[7-:3];           // 8 notes, 32 frames per note each. 256 frames total, ~4 seconds
+  always @(note_in)
+  case(note_in)
+      3'd0 : note_freq = 8'd151;
+      3'd1 : note_freq = 8'd26;
+      3'd2 : note_freq = 8'd40;
+      3'd3 : note_freq = 8'd60;
+      3'd4 : note_freq = 8'd90;
+      3'd5 : note_freq = 8'd143;
+      3'd6 : note_freq = 8'd23;
+      3'd7 : note_freq = 8'd35;
+  endcase
+
+  wire kick   = square60hz & (x < envelopeA);                 // 60Hz square wave with half second envelope
+  wire snare  = noise      & (x >= 32 && x < 32+envelopeB);   // noise with half second envelope
+  wire lead   = note       & (x >= 64 && x < 64+envelopeB);   // ROM square wave with quarter second envelope
+  assign audio = { kick | (snare & beats_1_3) | lead };
 
   reg [11:0] frame_counter;
   reg frame_counter_frac;
@@ -249,13 +270,22 @@ module tt_um_rejunity_vga_test01 (
         {frame_counter, frame_counter_frac} <= {frame_counter,frame_counter_frac} + 1;
       end
 
-
-      if (x == 1) begin
-        if (note > 1) begin 
-          note <= 0;
-          noise <= noise ^ noise_;
+      // noise
+      if (x == 0) begin
+        if (noise_counter > 1) begin 
+          noise_counter <= 0;
+          noise <= noise ^ noise_src;
         end else
-          note <= note + 1'b1;
+          noise_counter <= noise_counter + 1'b1;
+      end
+
+      // square wave
+      if (x == 0) begin
+        if (note_counter > note_freq) begin 
+          note_counter <= 0;
+          note <= ~note;
+        end else
+          note_counter <= note_counter + 1'b1;
       end
 
       // if (x == 256 && |y[1:0]==0) begin
