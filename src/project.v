@@ -209,7 +209,7 @@ module tt_um_rejunity_vga_test01 (
   // wire tails = y > 256+64 & y < 256+128+16 & x >= 256+256-64 & x < 256+256;
 
   wire ringR = y[9:7] == 3'b010 & |x[9:7] & (x[6:0] < title_r_pixels_in_scanline) &
-      ~(y > 256+70 & y < 256+128 & (x >= 256 & x < 256+64));
+      ~(y[6] & (x[9:7] == 2));
   wire ringL = y[9:7] == 3'b010 & x[9:7] == 3'b010 & (~x[6:0] < title_r_pixels_in_scanline);
   //.DDRR.OPP.
   //012345678 -> except 5 & 8
