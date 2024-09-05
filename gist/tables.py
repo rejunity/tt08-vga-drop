@@ -47,8 +47,13 @@ print("amp", "\n", amps[0:60], "\n", np.minimum(amps[0:14], 255))
 #   float h = 4.;
 #   float v = sin(pi2 * t * base * h) < 0.0 ? -.2 : .2;
 
-seqn = np.modf(1.+np.floor(.5+.5*(1.-tseq)) * 0.18972)[0]
+seqn = np.modf(2.+np.floor(.5+.5*(1.-tseq)) * 0.18972)[0]
 n = 20.0 + np.floor(seqn * 38.0)
 base = 440.0 * np.power(2.0, (n - 69.0) / 12.0) # ntof
 h = 4.
 print("notes", seqn, base*h)
+
+vsync_freq = 31_468 # http://www.tinyvga.com/vga-timing/640x480@60Hz
+freq = np.array([vsync_freq//2]*len(base)) / (base*h)
+print("notes", freq.astype(int)[::29])
+print("notes", np.roll(freq.astype(int),-1) - freq.astype(int))
