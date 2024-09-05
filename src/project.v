@@ -200,15 +200,21 @@ module tt_um_rejunity_vga_test01 (
                         dot2 + p_p;
 
   // generate title pixels
+  // wire ringR = y[9:7] == 3'b010 & |x[9:7] & (x[6:0] < title_r_pixels_in_scanline) &
+  //     ~(y > 256+70 & y < 256+128 & (x >= 256 & x < 256+64));
+  // wire ringL = y[9:7] == 3'b010 & x[9:7] == 3'b010 & (~x[6:0] < title_r_pixels_in_scanline);
+  // // .DDRR.OPP. => column on every odd 64 pixel sections except 0, 5 and 8th
+  // // 012345678 
+  // wire columns = y > 256+4 & y < 256+124 & x[6] & x[8:6] != 5 & ~x[9];
+  // wire tails = y > 256+64 & y < 256+128+16 & x >= 256+256-64 & x < 256+256;
+
   wire ringR = y[9:7] == 3'b010 & |x[9:7] & (x[6:0] < title_r_pixels_in_scanline) &
       ~(y > 256+70 & y < 256+128 & (x >= 256 & x < 256+64));
   wire ringL = y[9:7] == 3'b010 & x[9:7] == 3'b010 & (~x[6:0] < title_r_pixels_in_scanline);
-  // .DDRR.OPP. => column on every odd 64 pixel sections except 0, 5 and 8th
-  // 012345678 
-  wire columns = y > 256+4 & y < 256+124 & x[6] & x[8:6] != 5 & ~x[9];
-  wire tails = y > 256+64 & y < 256+128+16 & x >= 256+256-64 & x < 256+256;
-
-
+  //.DDRR.OPP.
+  //012345678 -> except 5 & 8
+  wire columns = x[6] & x[8:6] != 5 & ~x[9] & (y[9:7] == 2 | y[9:7] == 3) & y[7:0] > 4 & (y[7:0] < 124 | x[8]);
+  
   wire [2:0] part = frame_counter[9-:3];
   assign {R,G,B} =
     (~video_active) ? 6'b00_00_00 :
@@ -219,7 +225,7 @@ module tt_um_rejunity_vga_test01 (
     (part == 1) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } : // red lines
     (part == 0) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } : //+6'b110001
     // //               // 4'b1000 * (ppp_y > 200), ppp_y[6:5] };
-    (part == 5) ? { &ppp_y[5:2] | ringR | ringL | columns | tails ? 6'b111_111 : 6'b0 } : 
+    (part == 5) ? { &ppp_y[5:2] | ringR | ringL | columns ? 6'b111_111 : 6'b0 } : 
                 // { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
                 { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
 
