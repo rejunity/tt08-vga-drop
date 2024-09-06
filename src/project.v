@@ -438,10 +438,10 @@ wire [2:0] part = frame_counter[9-:3];
   endcase
 
   // wire kick   = square60hz & (~|x[7:5] & x[4:0] < envelopeA);                 // 60Hz square wave with half second envelope
-  wire kick   = square60hz & (x < envelopeA);                 // 60Hz square wave with half second envelope
-  wire snare  = noise      & (x >= 32 && x < 32+envelopeB);   // noise with half second envelope
-  wire lead   = note       & (x >= 64 && x < 64+envelopeB*2);   // ROM square wave with quarter second envelope
-  wire base   = note2      & (x >= 128 && x < ((beats_1_3)?(128+8):(128+32)));  
+  wire kick   = square60hz & (x < envelopeA*4);                 // 60Hz square wave with half second envelope
+  wire snare  = noise      & (x >= 128 && x < 128+envelopeB*4);   // noise with half second envelope
+  wire lead   = note       & (x >= 256 && x < 256+envelopeB*8);   // ROM square wave with quarter second envelope
+  wire base   = note2      & (x >= 512 && x < ((beats_1_3)?(512+8*4):(512+32*4)));  
   // wire snare  = noise      & (x[5] & x[4:0] < envelopeB/2); // noise with half second envelope
   // wire lead   = note       & (x[6] & x[5:0] < envelopeB); // ROM square wave with quarter second envelope
   // wire base   = note2      & (x[7] & ((beats_1_3)?(~|x[6:3]):(~|x[6:5])));  
