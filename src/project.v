@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Your Name
+ * Copyright (c) 2024 ReJ aka Renaldas Zioma
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -156,7 +156,7 @@ module tt_um_rejunity_vga_test01 (
         r2 <= r2 + 2*p_x + 1;
       end
 
-      // circle for title
+      // repeating circle for title
       if (!video_active & y[6:0] == 0) begin
         title_r <= 64*64+64*64;
       end else if (x == 640) begin
@@ -211,9 +211,11 @@ module tt_um_rejunity_vga_test01 (
   wire ringR = y[9:7] == 3'b010 & |x[9:7] & (x[6:0] < title_r_pixels_in_scanline) &
       ~(y[6] & (x[9:7] == 2));
   wire ringL = y[9:7] == 3'b010 & x[9:7] == 3'b010 & (~x[6:0] < title_r_pixels_in_scanline);
-  //.DDRR.OPP.
-  //012345678 -> except 5 & 8
+  // column on every odd 64 pixel sections except 0, 5 and 8th:
+  //    .DDRR.OPP.
+  //    012345678 
   wire columns = x[6] & x[8:6] != 5 & ~x[9] & (y[9:7] == 2 | y[9:7] == 3) & y[7:0] > 4 & (y[7:0] < 124 | x[8]);
+  wire title = ringR | ringL | columns;
   
   wire [2:0] part = frame_counter[9-:3];
   assign {R,G,B} =
@@ -257,6 +259,7 @@ module tt_um_rejunity_vga_test01 (
   // assign G = video_active ? frame_counter[2:1]  : 2'b00;
   // assign B = video_active ? frame_counter[3:2]  : 2'b00;
 
+  // music
   wire [12:0] timer = {frame_counter, frame_counter_frac};
   reg noise, noise_src = ^r1;
   reg [2:0] noise_counter;
@@ -267,9 +270,8 @@ module tt_um_rejunity_vga_test01 (
   wire       envelopeP8 = (|timer[3:2])*5'd31;// pulse for 8 frames
   wire beats_1_3 = timer[5:4] == 2'b10;
 
-
-  // melody notes: 151  26  40  60 _ 90 143  23  35
-  // x1.5 wrap-around progression
+  // melody notes (in hsync): 151  26  40  60 _ 90 143  23  35
+  // (x1.5 wrap-around progression)
   reg [8:0] note_freq;
   reg [8:0] note_counter;
   reg       note;
@@ -319,11 +321,6 @@ module tt_um_rejunity_vga_test01 (
         end else
           note_counter <= note_counter + 1'b1;
       end
-
-      // if (x == 256 && |y[1:0]==0) begin
-      // if (x == 256 && y[0]==0) begin
-      //   noise <= noise ^ noise_;
-      // end
     end
   end
   
@@ -334,38 +331,3 @@ module tt_um_rejunity_vga_test01 (
   assign uio_out = {8{audio}};
 
 endmodule
-
-
-
-//   reg [6:0] note;
-//   reg audio_out;
-
-//   reg [11:0] frame_counter;
-//   reg frame_counter_frac;
-//   always @(posedge clk) begin
-//     if (~rst_n) begin
-//       frame_counter <= 0;//60*5;
-//       frame_counter_frac <= 0;
-//     end else begin
-//       if (x == 0 && y == 0) begin
-//         {frame_counter, frame_counter_frac} <= {frame_counter,frame_counter_frac} + 1;
-//       end
-//       if (x == 1) begin
-//         if (note > 35) begin  // 440Hz
-//           note <= 0;
-//           audio_out <= ~audio_out;
-//         end else
-//           note <= note + 1'b1;
-//       end
-//       // if (vsync && x == 0 && y == 0) begin
-//       //   frame_counter <= 3;//frame_counter + 1;
-//       // end
-//     end
-//   end
-
-//   // TinyVGA PMOD
-//   assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
-//   wire audio = {audio_out & (x < 10)};
-//   assign uio_out = {8{audio}};
-
-// endmodule
