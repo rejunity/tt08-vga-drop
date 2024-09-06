@@ -177,7 +177,8 @@ module tt_um_rejunity_vga_test01 (
   wire signed [9:0] center_x = 10'sd320+offset_x;
   wire signed [9:0] center_y = 10'sd240+offset_y;
   wire signed [9:0] p_x = x - center_x;
-  wire signed [9:0] p_y = y - center_y + (beats_1_3&fractal_mode)*(envelopeB>>1);
+  wire signed [9:0] p_y = y - center_y + (beats_1_3 & part==6)*(envelopeB>>1);
+                                      //  - (beats_1_3 & part==1)*(envelopeB>>1);
 
   reg signed [17:0] r1;                                               // was 23 bit
   reg signed [18:0] r2;                                               // was 23 bit
