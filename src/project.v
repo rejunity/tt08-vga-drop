@@ -177,25 +177,20 @@ module tt_um_rejunity_vga_test01 (
   wire [7:0] pp_x = dot;
   wire [7:0] pp_y = dot;
 
-  wire zoom_mode = (frame_counter[7] & frame_counter[8]);
+  wire zoom_mode = part == 5 | part == 6; ////(frame_counter[7] & frame_counter[8]);
   // wire signed [22:0] dot2 = ((pp_x * pp_x * 8) * frame) >> (18 - 2*zoom_mode);
   wire signed [22:0] dot2 = ((pp_x * pp_x) * frame) >> (15 - 2*zoom_mode);
   wire [7:0] ppp_x = dot2;
 
-  // A
-  // wire [7:0] ppp_y = dot2 + p_y * (frame[7:5]+1'd1) * frame_counter[7] - p_x * (frame[6:5]+1'd1) * frame_counter[7];
-  // B
-  // wire [7:0] ppp_y = dot2 + p_y*frame_counter[7] - p_x/2*frame_counter[7];
-
-  // A & B combined
-  wire mode_a = frame_counter[8];
-  wire mode_b = frame_counter[7]^frame_counter[8];
-  // wire [7:0] ppp_y = dot2 + p_y*mode_a - p_x/2*mode_a +
-  //                           p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1) * mode_b;
+  // A: enables drop with different angle, otherwise tunnel
+  wire mode_a = part == 0 | part == 1 | part == 2 | part == 5;//frame_counter[8];
+  // B: enables drop and starting close
+  wire mode_b = part == 0 | part == 4;//frame_counter[7]^frame_counter[8];
   wire [7:0] p_p =          p_y*mode_a - p_x/2*mode_a +
-                            p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1) * mode_b;
+                            p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1)*mode_b;
 
-  wire [7:0] ppp_y = frame_counter[8:7] == 2? 
+  wire fractal_mode = part == 1 | part == 6;//frame_counter[8:7] == 2;
+  wire [7:0] ppp_y = fractal_mode? 
                       -(y & 8'h7f & p_x) + (r>>11):
                         dot2 + p_p;
 
@@ -217,19 +212,37 @@ module tt_um_rejunity_vga_test01 (
   wire columns = x[6] & x[8:6] != 5 & ~x[9] & (y[9:7] == 2 | y[9:7] == 3) & y[7:0] > 4 & (y[7:0] < 124 | x[8]);
   wire title = ringR | ringL | columns;
   
-  wire [2:0] part = frame_counter[9-:3];
+
+  // 0: title + wakes
+  // 1: fractal red/golden
+  // 2: drop zoom 1
+  // 3: tunnel
+  // 4: red wakes
+  // 5: drop zoom 2 (2 zoom beats)
+  // 6: fractal multi-color
+  // 7: title+tunnel
+
+wire [2:0] part = frame_counter[9-:3];
   assign {R,G,B} =
     (~video_active) ? 6'b00_00_00 :
-    // (part == 2) ? { (&ppp_y[5:2]) * ppp_y[1-:2], 1'b0, &ppp_y[5:3] * ppp_y[0], 2'b00 } : // red/golden serpinsky
-    // (part == 2) ? { (&ppp_y[5:2]) * ppp_y[1-:2], (&ppp_y[5:2]) * ppp_y[0], 3'b000 } : // red/golden serpinsky
-    part == 2 ? { &ppp_y[5:2] * ppp_y[1-:2], &ppp_y[6:0] * ppp_y[1-:2], 2'b00 }: // red/golden serpinsky
-    (part == 6) ? { ppp_y[7-:2], ppp_y[6-:2], ppp_y[5-:2] } :     // colored serpinsky
-    (part == 1) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } : // red lines
-    (part == 0) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } : //+6'b110001
-    // //               // 4'b1000 * (ppp_y > 200), ppp_y[6:5] };
-    (part == 5) ? { &ppp_y[5:2] | ringR | ringL | columns ? 6'b111_111 : 6'b0 } : 
-                // { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
-                { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
+    (part == 0) ? { &ppp_y[5:2] | title ? 6'b111_111 : 6'b0 } :                     // title + wakes
+    (part == 1) ? { &ppp_y[5:2] * ppp_y[1-:2], &ppp_y[6:0] * ppp_y[1-:2], 2'b00 } : // red/golden serpinsky
+    (part == 3) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } :             // tunnel
+    (part == 4) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } :      // red wakes
+    (part == 6) ? { ppp_y[7-:2], ppp_y[6-:2], ppp_y[5-:2] } :                       // multi-color serpinsky
+    (part == 7) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } | {6{title}} :// title + tunnel
+                  { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
+
+    // // (part == 2) ? { (&ppp_y[5:2]) * ppp_y[1-:2], 1'b0, &ppp_y[5:3] * ppp_y[0], 2'b00 } : // red/golden serpinsky
+    // // (part == 2) ? { (&ppp_y[5:2]) * ppp_y[1-:2], (&ppp_y[5:2]) * ppp_y[0], 3'b000 } : // red/golden serpinsky
+    // part == 2 ? { &ppp_y[5:2] * ppp_y[1-:2], &ppp_y[6:0] * ppp_y[1-:2], 2'b00 }: // red/golden serpinsky
+    // (part == 6) ? { ppp_y[7-:2], ppp_y[6-:2], ppp_y[5-:2] } :     // colored serpinsky
+    // (part == 1) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } : // red lines
+    // (part == 0) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } : //+6'b110001
+    // // //               // 4'b1000 * (ppp_y > 200), ppp_y[6:5] };
+    // (part == 5) ? { &ppp_y[5:2] | ringR | ringL | columns ? 6'b111_111 : 6'b0 } : 
+    //             // { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
+    //             { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
 
 
 
