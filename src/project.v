@@ -441,7 +441,7 @@ wire [2:0] part = frame_counter[9-:3];
   // wire base   = note2      & (x >= 128 && x < ((beats_1_3)?(128+8):(128+32)));  
   wire kick   = square60hz & (~|x[7:5] & x[4:0] < envelopeA);                 // 60Hz square wave with half second envelope
   wire snare  = noise      & (x[5] & x[4:0] < envelopeB/2); // noise with half second envelope
-  wire lead   = note       & (x[6] & x[5:0] < envelopeB*2); // ROM square wave with quarter second envelope
+  wire lead   = note       & (x[6] & x[5:0] < envelopeB); // ROM square wave with quarter second envelope
   wire base   = note2      & (x[7] & ((beats_1_3)?(~|x[6:3]):(~|x[6:5])));  
   assign audio = { kick | (snare & beats_1_3 & part != 0) | (base) | (lead & part > 2) };
 
