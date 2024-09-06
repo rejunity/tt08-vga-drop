@@ -177,7 +177,7 @@ module tt_um_rejunity_vga_test01 (
   wire signed [9:0] center_x = 10'sd320+offset_x;
   wire signed [9:0] center_y = 10'sd240+offset_y;
   wire signed [9:0] p_x = x - center_x;
-  wire signed [9:0] p_y = y - center_y;
+  wire signed [9:0] p_y = y - center_y + (beats_1_3&fractal_mode)*(envelopeB>>1);
 
   reg signed [17:0] r1;                                               // was 23 bit
   reg signed [18:0] r2;                                               // was 23 bit
@@ -291,9 +291,9 @@ wire [2:0] part = frame_counter[9-:3];
     (part == 3) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } :             // tunnel
     (part == 4) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } :      // red wakes
     (part == 6) ? { ppp_y[7-:2], ppp_y[6-:2], ppp_y[5-:2] } :                       // multi-color serpinsky
-    (part == 7) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } |
-                  { 6{title } } :                                    // title + tunnel
-                  // { 6{title & (frame >= 64) }  } :                                    // title + tunnel
+    (part == 7) ? { |ppp_y[7:6] ? {4'b11  _00, dot[6:5]} : ppp_y[5:4] } |
+                  // { 6{title} } :                                    // title + tunnel
+                  { 6{title & (frame_counter[6:0] >= 96) }  } :                                    // title + tunnel
                   { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
 
     // // (part == 2) ? { (&ppp_y[5:2]) * ppp_y[1-:2], 1'b0, &ppp_y[5:3] * ppp_y[0], 2'b00 } : // red/golden serpinsky
@@ -340,7 +340,7 @@ wire [2:0] part = frame_counter[9-:3];
   reg noise, noise_src = ^r1;
   reg [2:0] noise_counter;
 
-  wire square60hz = y < 255;                  // 60Hz square wave
+  wire square60hz =  y < 262;                 // 60Hz square wave
   wire square120hz = y[7];                    // 120Hz square wave
   wire square240hz = y[6];                    // 240Hz square wave
   wire square480hz = y[5];                    // 480Hz square wave
@@ -416,24 +416,33 @@ wire [2:0] part = frame_counter[9-:3];
   wire [2:0] note2_in = timer[8-:3];           // 8 notes, 32 frames per note each. 256 frames total, ~4 seconds
   always @(note2_in)
   case(note2_in)
-      3'd0 : note2_freq = `E1
-      3'd1 : note2_freq = `D2
-      3'd2 : note2_freq = `A1
-      3'd3 : note2_freq = `D2
-      3'd4 : note2_freq = `E1
-      3'd5 : note2_freq = `D2
-      3'd6 : note2_freq = `G1
-      3'd7 : note2_freq = `Fs1
+      // 3'd0 : note2_freq = `E1
+      // 3'd1 : note2_freq = `D2
+      // 3'd2 : note2_freq = `A1
+      // 3'd3 : note2_freq = `D2
+      // 3'd4 : note2_freq = `E1
+      // 3'd5 : note2_freq = `D2
+      // 3'd6 : note2_freq = `G1
+      // 3'd7 : note2_freq = `Fs1
+
+      3'd0 : note2_freq = `B1
+      3'd1 : note2_freq = `A2
+      3'd2 : note2_freq = `E1
+      3'd3 : note2_freq = `A2
+      3'd4 : note2_freq = `B1
+      3'd5 : note2_freq = `A2
+      3'd6 : note2_freq = `D1
+      3'd7 : note2_freq = `Cs1
   endcase
 
   wire kick   = square60hz & (x < envelopeA);                 // 60Hz square wave with half second envelope
   wire snare  = noise      & (x >= 32 && x < 32+envelopeB);   // noise with half second envelope
-  wire lead   = note       & (x >= 64 && x < 64+envelopeB);   // ROM square wave with quarter second envelope
+  wire lead   = note       & (x >= 64 && x < 64+envelopeB*2);   // ROM square wave with quarter second envelope
   // wire base   =              (x >= 96 && x < 96+(base_counter>>3));   // ROM square wave with quarter second envelope
  // wire base   =              (x >= 96 && x < 8'd96+(note2_counter[4:0]*4));   // ROM square wave with quarter second envelope
-  wire base   = note2      & (x >= 128 && x < 128+16-8*(beats_1_3));
+  wire base   = note2      & (x >= 128 && x < ((beats_1_3)?(128+8):(128+32)));
   // wire lead   = note & (x < envelopeA);
-  assign audio = { kick | (snare & beats_1_3) | base | lead };
+  assign audio = { kick | (snare & beats_1_3 & part>0) | (base) | (lead & part>2) };
 
   reg [11:0] frame_counter;
   reg frame_counter_frac;
@@ -471,7 +480,7 @@ wire [2:0] part = frame_counter[9-:3];
           note_counter <= note_counter + 1'b1;
         end
 
-        if (note2_counter > note2_freq*2) begin
+        if (note2_counter > note2_freq) begin
           note2_counter <= 0;
           note2 <= ~note2;
         end else begin
