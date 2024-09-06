@@ -56,4 +56,30 @@ print("notes", seqn, base*h)
 vsync_freq = 31_468 # http://www.tinyvga.com/vga-timing/640x480@60Hz
 freq = np.array([vsync_freq//2]*len(base)) / (base*h)
 print("notes", freq.astype(int)[::29])
-print("notes", np.roll(freq.astype(int),-1) - freq.astype(int))
+#print("notes", np.roll(freq.astype(int),-1) - freq.astype(int))
+
+
+octave_names = ['C', 'Cs', 'D', 'Ds', 'E', 'F', 'Fs', 'G', 'Gs', 'A', 'As', 'B']
+octave_freq = np.array([ \
+261.63,\
+277.18,\
+293.66,\
+311.13,\
+329.63,\
+349.23,\
+369.99,\
+392.00,\
+415.30,\
+440.00,\
+466.16,\
+493.88\
+])
+
+for octave in range(1,6):
+    octave_base_div = 2. ** (octave - 4)
+    freq = octave_freq*octave_base_div
+    hsync = np.array([vsync_freq]*len(freq)) / (freq*2.)
+    hsync = np.round(hsync).astype(int)
+
+    for i, note in enumerate(octave_names):
+        print(f"`define {note}{octave}\t{hsync[i]}; // {freq[i]} Hz ")
