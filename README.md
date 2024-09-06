@@ -1,5 +1,19 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
+https://github.com/user-attachments/assets/ede47d77-f7b0-44df-af79-b9e3f9fc127f
+
+# The "Drop" ASIC
+
+ASIC audio visual demo.
+No CPU, no GPU, no memory. Racing the beam and straight to VGA 640x480.
+
+Entry to Tiny Tapeout Demoscene 2024 September competition: https://tinytapeout.com/competitions/demoscene/
+
+# Credits
+
+ReJ aka Renaldas Zioma -- code, design
+eriQue aka Erik Hemming -- music, design
+Matthias Kampa -- prototype code, design
 
 # Useful links
 
