@@ -178,7 +178,7 @@ module tt_um_rejunity_vga_test01 (
   wire signed [9:0] center_y = 10'sd240+offset_y;
   wire signed [9:0] p_x = x - center_x;
   wire signed [9:0] p_y = y - center_y + (beats_1_3 & part==6)*(envelopeB>>1);
-                                      //  - (beats_1_3 & part==1)*(envelopeB>>1);
+                                      //  + (beats_1_3 & part==1)*(16-envelopeB>>1);
 
   reg signed [17:0] r1;                                               // was 23 bit
   reg signed [18:0] r2;                                               // was 23 bit
@@ -292,7 +292,7 @@ wire [2:0] part = frame_counter[9-:3];
     (part == 3) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } :             // tunnel
     (part == 4) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } :      // red wakes
     (part == 6) ? { ppp_y[7-:2], ppp_y[6-:2], ppp_y[5-:2] } :                       // multi-color serpinsky
-    (part == 7) ? { |ppp_y[7:6] ? {4'b11  _00, dot[6:5]} : ppp_y[5:4] } |
+    (part == 7) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } |
                   // { 6{title} } :                                    // title + tunnel
                   { 6{title & (frame_counter[6:0] >= 96) }  } :                                    // title + tunnel
                   { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
