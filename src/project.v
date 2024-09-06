@@ -413,6 +413,19 @@ wire [2:0] part = frame_counter[9-:3];
       // 4'd15: note_freq = `B3
   endcase
 
+  wire [2:0] note2_in = timer[8-:3];           // 8 notes, 32 frames per note each. 256 frames total, ~4 seconds
+  always @(note2_in)
+  case(note2_in)
+      3'd0 : note2_freq = `E1
+      3'd1 : note2_freq = `D2
+      3'd2 : note2_freq = `A1
+      3'd3 : note2_freq = `D2
+      3'd4 : note2_freq = `E1
+      3'd5 : note2_freq = `D2
+      3'd6 : note2_freq = `G1
+      3'd7 : note2_freq = `Fs1
+  endcase
+
   wire kick   = square60hz & (x < envelopeA);                 // 60Hz square wave with half second envelope
   wire snare  = noise      & (x >= 32 && x < 32+envelopeB);   // noise with half second envelope
   wire lead   = note       & (x >= 64 && x < 64+envelopeB);   // ROM square wave with quarter second envelope
@@ -442,8 +455,8 @@ wire [2:0] part = frame_counter[9-:3];
           noise_counter <= noise_counter + 1'b1;
       end
 
-      if (~timer[3])
-        note2_freq <= note_freq << 2;
+      // if (~timer[3])
+      //   note2_freq <= note_freq << 2;
 
       // square wave
       if (x == 0) begin
@@ -458,7 +471,7 @@ wire [2:0] part = frame_counter[9-:3];
           note_counter <= note_counter + 1'b1;
         end
 
-        if (note2_counter > note2_freq) begin
+        if (note2_counter > note2_freq*2) begin
           note2_counter <= 0;
           note2 <= ~note2;
         end else begin
