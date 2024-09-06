@@ -5,6 +5,67 @@
 
 `default_nettype none
 
+`define C1	481; // 32.70375 Hz 
+`define Cs1	454; // 34.6475 Hz 
+`define D1	429; // 36.7075 Hz 
+`define Ds1	405; // 38.89125 Hz 
+`define E1	382; // 41.20375 Hz 
+`define F1	360; // 43.65375 Hz 
+`define Fs1	340; // 46.24875 Hz 
+`define G1	321; // 49.0 Hz 
+`define Gs1	303; // 51.9125 Hz 
+`define A1	286; // 55.0 Hz 
+`define As1	270; // 58.27 Hz 
+`define B1	255; // 61.735 Hz 
+`define C2	241; // 65.4075 Hz 
+`define Cs2	227; // 69.295 Hz 
+`define D2	214; // 73.415 Hz 
+`define Ds2	202; // 77.7825 Hz 
+`define E2	191; // 82.4075 Hz 
+`define F2	180; // 87.3075 Hz 
+`define Fs2	170; // 92.4975 Hz 
+`define G2	161; // 98.0 Hz 
+`define Gs2	152; // 103.825 Hz 
+`define A2	143; // 110.0 Hz 
+`define As2	135; // 116.54 Hz 
+`define B2	127; // 123.47 Hz 
+`define C3	120; // 130.815 Hz 
+`define Cs3	114; // 138.59 Hz 
+`define D3	107; // 146.83 Hz 
+`define Ds3	101; // 155.565 Hz 
+`define E3	95; // 164.815 Hz 
+`define F3	90; // 174.615 Hz 
+`define Fs3	85; // 184.995 Hz 
+`define G3	80; // 196.0 Hz 
+`define Gs3	76; // 207.65 Hz 
+`define A3	72; // 220.0 Hz 
+`define As3	68; // 233.08 Hz 
+`define B3	64; // 246.94 Hz 
+`define C4	60; // 261.63 Hz 
+`define Cs4	57; // 277.18 Hz 
+`define D4	54; // 293.66 Hz 
+`define Ds4	51; // 311.13 Hz 
+`define E4	48; // 329.63 Hz 
+`define F4	45; // 349.23 Hz 
+`define Fs4	43; // 369.99 Hz 
+`define G4	40; // 392.0 Hz 
+`define Gs4	38; // 415.3 Hz 
+`define A4	36; // 440.0 Hz 
+`define As4	34; // 466.16 Hz 
+`define B4	32; // 493.88 Hz 
+`define C5	30; // 523.26 Hz 
+`define Cs5	28; // 554.36 Hz 
+`define D5	27; // 587.32 Hz 
+`define Ds5	25; // 622.26 Hz 
+`define E5	24; // 659.26 Hz 
+`define F5	23; // 698.46 Hz 
+`define Fs5	21; // 739.98 Hz 
+`define G5	20; // 784.0 Hz 
+`define Gs5	19; // 830.6 Hz 
+`define A5	18; // 880.0 Hz 
+`define As5	17; // 932.32 Hz 
+`define B5	16; // 987.76 Hz 
+
 /*
 Video sync generator, used to drive a VGA monitor.
 Timing from: https://en.wikipedia.org/wiki/Video_Graphics_Array
@@ -280,6 +341,9 @@ wire [2:0] part = frame_counter[9-:3];
   reg [2:0] noise_counter;
 
   wire square60hz = y < 255;                  // 60Hz square wave
+  wire square120hz = y[7];                    // 120Hz square wave
+  wire square240hz = y[6];                    // 240Hz square wave
+  wire square480hz = y[5];                    // 480Hz square wave
   wire [4:0] envelopeA = 5'd31 - timer[4:0];  // exp(t*-10) decays to 0 approximately in 32 frames  [255 215 181 153 129 109  92  77  65  55  46  39  33  28  23  20  16  14 12  10   8   7   6   5   4   3   3   2   2]
   wire [4:0] envelopeB = 5'd31 - timer[3:0]*2;// exp(t*-20) decays to 0 approximately in 16 frames  [255 181 129  92  65  46  33  23  16  12   8   6   4   3]
   wire       envelopeP8 = (|timer[3:2])*5'd31;// pulse for 8 frames
@@ -287,35 +351,76 @@ wire [2:0] part = frame_counter[9-:3];
 
   // melody notes (in hsync): 151  26  40  60 _ 90 143  23  35
   // (x1.5 wrap-around progression)
+  reg [9:0] note2_freq;
+  reg [9:0] note2_counter;
+  reg       note2;
+
   reg [8:0] note_freq;
   reg [8:0] note_counter;
   reg       note;
-  wire [3:0] note_in = timer[8-:4];           // 8 notes, 32 frames per note each. 256 frames total, ~4 seconds
+  wire [3:0] note_in = timer[7-:4];           // 8 notes, 32 frames per note each. 256 frames total, ~4 seconds
   always @(note_in)
   case(note_in)
-      4'd0 : note_freq = 8'd151;
-      4'd1 : note_freq = 8'd26;
-      4'd2 : note_freq = 8'd40;
-      4'd3 : note_freq = 8'd60;
-      4'd4 : note_freq = 8'd90;
-      4'd5 : note_freq = 8'd143;
-      4'd6 : note_freq = 8'd23;
-      4'd7 : note_freq = 8'd35;
+      // 4'd0 : note_freq = 8'd151;
+      // 4'd1 : note_freq = 8'd26;
+      // 4'd2 : note_freq = 8'd40;
+      // 4'd3 : note_freq = 8'd60;
+      // 4'd4 : note_freq = 8'd90;
+      // 4'd5 : note_freq = 8'd143;
+      // 4'd6 : note_freq = 8'd23;
+      // 4'd7 : note_freq = 8'd35;
+      // 4'd8 : note_freq = 8'd151;
+      // 4'd9 : note_freq = 8'd23;
+      // 4'd10: note_freq = 8'd35;
+      // 4'd11: note_freq = 8'd151;
+      // 4'd12: note_freq = 8'd143;
+      // 4'd13: note_freq = 8'd151;
+      // 4'd14: note_freq = 8'd40;
+      // 4'd15: note_freq = 8'd60;
 
-      4'd8 : note_freq = 8'd151;
-      4'd9 : note_freq = 8'd23;
-      4'd10: note_freq = 8'd35;
-      4'd11: note_freq = 8'd151;
-      4'd12: note_freq = 8'd143;
-      4'd13: note_freq = 8'd151;
-      4'd14: note_freq = 8'd40;
-      4'd15: note_freq = 8'd60;
+      4'd0 : note_freq = `E2
+      4'd1 : note_freq = `E3
+      4'd2 : note_freq = `D3
+      4'd3 : note_freq = `E3
+      4'd4 : note_freq = `A2
+      4'd5 : note_freq = `B2
+      4'd6 : note_freq = `D3
+      4'd7 : note_freq = `E3
+      4'd8 : note_freq = `E2
+      4'd9 : note_freq = `E3
+      4'd10: note_freq = `D3
+      4'd11: note_freq = `E3
+      4'd12: note_freq = `G2
+      4'd13: note_freq = `E3
+      4'd14: note_freq = `Fs2
+      4'd15: note_freq = `E3
+
+      // 4'd0 : note_freq = `B2
+      // 4'd1 : note_freq = `B3
+      // 4'd2 : note_freq = `A3
+      // 4'd3 : note_freq = `B3
+      // 4'd4 : note_freq = `E2
+      // 4'd5 : note_freq = `Fs2
+      // 4'd6 : note_freq = `A3
+      // 4'd7 : note_freq = `B3
+      // 4'd8 : note_freq = `B2
+      // 4'd9 : note_freq = `B3
+      // 4'd10: note_freq = `A3
+      // 4'd11: note_freq = `B3
+      // 4'd12: note_freq = `D2
+      // 4'd13: note_freq = `B3
+      // 4'd14: note_freq = `Cs2
+      // 4'd15: note_freq = `B3
   endcase
 
   wire kick   = square60hz & (x < envelopeA);                 // 60Hz square wave with half second envelope
   wire snare  = noise      & (x >= 32 && x < 32+envelopeB);   // noise with half second envelope
   wire lead   = note       & (x >= 64 && x < 64+envelopeB);   // ROM square wave with quarter second envelope
-  assign audio = { kick | (snare & beats_1_3) | lead };
+  // wire base   =              (x >= 96 && x < 96+(base_counter>>3));   // ROM square wave with quarter second envelope
+ // wire base   =              (x >= 96 && x < 8'd96+(note2_counter[4:0]*4));   // ROM square wave with quarter second envelope
+  wire base   = note2      & (x >= 128 && x < 128+16-8*(beats_1_3));
+  // wire lead   = note & (x < envelopeA);
+  assign audio = { kick | (snare & beats_1_3) | base | lead };
 
   reg [11:0] frame_counter;
   reg frame_counter_frac;
@@ -337,13 +442,28 @@ wire [2:0] part = frame_counter[9-:3];
           noise_counter <= noise_counter + 1'b1;
       end
 
+      if (~timer[3])
+        note2_freq <= note_freq << 2;
+
       // square wave
       if (x == 0) begin
-        if (note_counter > note_freq) begin 
+        // if (note)
+        //   base_counter <= base_counter + 1'b1;
+
+        // if (note_counter > (note_freq>>timer[3])) begin 
+        if (note_counter > note_freq) begin
           note_counter <= 0;
           note <= ~note;
-        end else
+        end else begin
           note_counter <= note_counter + 1'b1;
+        end
+
+        if (note2_counter > note2_freq) begin
+          note2_counter <= 0;
+          note2 <= ~note2;
+        end else begin
+          note2_counter <= note2_counter + 1'b1;
+        end
       end
     end
   end
