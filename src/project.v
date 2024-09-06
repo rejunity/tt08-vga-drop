@@ -454,6 +454,13 @@ wire [2:0] part = frame_counter[9-:3];
     if (~rst_n) begin
       frame_counter <= 0;
       frame_counter_frac <= 0;
+      noise_counter <= 0;
+      note_counter <= 0;
+      note2_counter <= 0;
+      noise <= 0;
+      note <= 0;
+      note2 <= 0;
+
     end else begin
       if (x == 0 && y == 0) begin
         {frame_counter, frame_counter_frac} <= {frame_counter,frame_counter_frac} + 1;
