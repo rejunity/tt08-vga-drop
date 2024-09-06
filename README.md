@@ -1,6 +1,6 @@
 ![](../../workflows/gds/badge.svg) ![](../../workflows/docs/badge.svg) ![](../../workflows/test/badge.svg) ![](../../workflows/fpga/badge.svg)
 
-https://github.com/user-attachments/assets/ede47d77-f7b0-44df-af79-b9e3f9fc127f
+https://github.com/user-attachments/assets/4055923e-9adc-49b3-bb17-637b87bc0810
 
 # The "Drop" ASIC
 
@@ -13,7 +13,13 @@ Entry to Tiny Tapeout Demoscene 2024 September competition: https://tinytapeout.
 
 ReJ aka **Renaldas Zioma** -- code, design  
 eriQue aka **Erik Hemming** -- music, design  
-**Matthias Kampa** -- prototype code, design  
+**Matthias Kampa** -- prototype code, design
+
+# Recordings
+
+Recording from VGA monitor
+
+https://github.com/user-attachments/assets/ede47d77-f7b0-44df-af79-b9e3f9fc127f
 
 # Useful links
 
