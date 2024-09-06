@@ -287,7 +287,7 @@ module tt_um_rejunity_vga_test01 (
 wire [2:0] part = frame_counter[9-:3];
   assign {R,G,B} =
     (~video_active) ? 6'b00_00_00 :
-    (part == 0) ? { &ppp_y[5:2] | title ? 6'b111_111 : 6'b0 } :                     // title + wakes
+    (part == 0) ? { &ppp_y[5:3] | title ? 6'b111_111 : 6'b0 } :                     // title + wakes
     (part == 1) ? { &ppp_y[5:2] * ppp_y[1-:2], &ppp_y[6:0] * ppp_y[1-:2], 2'b00 } : // red/golden serpinsky
     (part == 3) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } :             // tunnel
     (part == 4) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } :      // red wakes
