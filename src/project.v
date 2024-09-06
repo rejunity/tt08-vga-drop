@@ -448,6 +448,11 @@ wire [2:0] part = frame_counter[9-:3];
   // wire base   = note2      & (x[7] & ((beats_1_3)?(~|x[6:3]):(~|x[6:5])));  
   assign audio = { kick | (snare & beats_1_3 & part != 0) | (base) | (lead & part > 2) };
 
+
+  reg [7:0] VIDEO_OUT;
+  reg [7:0] AUDIO_OUT;
+
+
   reg [11:0] frame_counter;
   reg frame_counter_frac;
   always @(posedge clk) begin
@@ -461,7 +466,15 @@ wire [2:0] part = frame_counter[9-:3];
       note <= 0;
       note2 <= 0;
 
+      VIDEO_OUT <= 0;
+      AUDIO_OUT <= 0;
+
+
     end else begin
+
+      VIDEO_OUT <= {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
+      AUDIO_OUT <= {8{audio}};
+      
       if (x == 0 && y == 0) begin
         {frame_counter, frame_counter_frac} <= {frame_counter,frame_counter_frac} + 1;
       end
@@ -503,8 +516,8 @@ wire [2:0] part = frame_counter[9-:3];
   
 
   // TinyVGA PMOD
-  assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
+  assign uo_out = VIDEO_OUT;//{hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
   // TinyAudio PMOD
-  assign uio_out = {8{audio}};
+  assign uio_out = AUDIO_OUT;//{8{audio}};
 
 endmodule
