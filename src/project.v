@@ -230,7 +230,9 @@ wire [2:0] part = frame_counter[9-:3];
     (part == 3) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } :             // tunnel
     (part == 4) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } :      // red wakes
     (part == 6) ? { ppp_y[7-:2], ppp_y[6-:2], ppp_y[5-:2] } :                       // multi-color serpinsky
-    (part == 7) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } | {6{title}} :// title + tunnel
+    (part == 7) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } |
+                  { 6{title } } :                                    // title + tunnel
+                  // { 6{title & (frame >= 64) }  } :                                    // title + tunnel
                   { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
 
     // // (part == 2) ? { (&ppp_y[5:2]) * ppp_y[1-:2], 1'b0, &ppp_y[5:3] * ppp_y[0], 2'b00 } : // red/golden serpinsky
@@ -288,17 +290,26 @@ wire [2:0] part = frame_counter[9-:3];
   reg [8:0] note_freq;
   reg [8:0] note_counter;
   reg       note;
-  wire [2:0] note_in = timer[7-:3];           // 8 notes, 32 frames per note each. 256 frames total, ~4 seconds
+  wire [3:0] note_in = timer[8-:4];           // 8 notes, 32 frames per note each. 256 frames total, ~4 seconds
   always @(note_in)
   case(note_in)
-      3'd0 : note_freq = 8'd151;
-      3'd1 : note_freq = 8'd26;
-      3'd2 : note_freq = 8'd40;
-      3'd3 : note_freq = 8'd60;
-      3'd4 : note_freq = 8'd90;
-      3'd5 : note_freq = 8'd143;
-      3'd6 : note_freq = 8'd23;
-      3'd7 : note_freq = 8'd35;
+      4'd0 : note_freq = 8'd151;
+      4'd1 : note_freq = 8'd26;
+      4'd2 : note_freq = 8'd40;
+      4'd3 : note_freq = 8'd60;
+      4'd4 : note_freq = 8'd90;
+      4'd5 : note_freq = 8'd143;
+      4'd6 : note_freq = 8'd23;
+      4'd7 : note_freq = 8'd35;
+
+      4'd8 : note_freq = 8'd151;
+      4'd9 : note_freq = 8'd23;
+      4'd10: note_freq = 8'd35;
+      4'd11: note_freq = 8'd151;
+      4'd12: note_freq = 8'd143;
+      4'd13: note_freq = 8'd151;
+      4'd14: note_freq = 8'd40;
+      4'd15: note_freq = 8'd60;
   endcase
 
   wire kick   = square60hz & (x < envelopeA);                 // 60Hz square wave with half second envelope
