@@ -296,7 +296,8 @@ wire [2:0] part = frame_counter[9-:3];
                   // { 6{title} } :                                    // title + tunnel
                   { 6{title & (frame_counter[6:0] >= 96) }  } :                                    // title + tunnel
                   // { ppp_x[7-:2] + ppp_y[5-:2], ppp_y[5-:2], ppp_y[3-:2] };
-                  { ppp_y[6-:2], ppp_y[6-:2], ppp_y[6-:2] } | {&ppp_x[7:6],&ppp_x[7:6],~ppp_x[7:6]};
+                  // { ppp_y[6-:2], ppp_y[6-:2], ppp_y[6-:2] } | {&ppp_x[7:6],&ppp_x[7:6],~ppp_x[7:6]};
+                  { ppp_y[7-:2], ppp_y[7-:2], ppp_y[7-:2] } | {4'b0,~ppp_x[6-:2]};
 
     // // (part == 2) ? { (&ppp_y[5:2]) * ppp_y[1-:2], 1'b0, &ppp_y[5:3] * ppp_y[0], 2'b00 } : // red/golden serpinsky
     // // (part == 2) ? { (&ppp_y[5:2]) * ppp_y[1-:2], (&ppp_y[5:2]) * ppp_y[0], 3'b000 } : // red/golden serpinsky
