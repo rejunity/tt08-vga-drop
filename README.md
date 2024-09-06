@@ -11,9 +11,9 @@ Entry to Tiny Tapeout Demoscene 2024 September competition: https://tinytapeout.
 
 # Credits
 
-ReJ aka Renaldas Zioma -- code, design
-eriQue aka Erik Hemming -- music, design
-Matthias Kampa -- prototype code, design
+ReJ aka **Renaldas Zioma** -- code, design  
+eriQue aka **Erik Hemming** -- music, design  
+**Matthias Kampa** -- prototype code, design  
 
 # Useful links
 
