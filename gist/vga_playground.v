@@ -205,12 +205,12 @@ module tt_um_vga_example(
   // assign R = video_active ? { ppp_x[7-:2] + ppp_y[5-:2]} : 2'b00;
 
   // wire ring = title_r < 60*60;//(240-36)*(240-36);
-  wire ringR = y[9:7] == 3'b010 & |(x[9:7] & 3'b111) & (x[6:0] < title_r_pixels_in_scanline) &
+  wire ringR = y[9:7] == 3'b010 & |x[9:7] & (x[6:0] < title_r_pixels_in_scanline) &
       ~(y > 256+70 & y < 256+128 & (x >= 256 & x < 256+64));
   wire ringL = y[9:7] == 3'b010 & x[9:7] == 3'b010 & (~x[6:0] < title_r_pixels_in_scanline);
   //.DDRR.OPP.
   //012345678 -> except 5 & 8
-  wire columns = y > 256+4 & y < 256+124 & ~x[9] & x[8:6] & x[8:6] != 5;
+  wire columns = y > 256+4 & y < 256+124 & x[6] & x[8:6] != 5 & ~x[9];
   wire tails = y > 256+64 & y < 256+128+16 & (x >= 256+256-64 & x < 256+256);
 
   wire [2:0] part = 2;//frame_counter[9-:3];
