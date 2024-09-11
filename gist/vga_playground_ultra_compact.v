@@ -1,7 +1,7 @@
 // "Drop" demo in just 7 tweets of #Verilog
 // @tinytapeout #ASIC
 // To run demo in the browser - copy paste tweets below into: https://tinytapeout.github.io/vga-playground
-// Or use human readable source from: 
+// Or use human readable source from: https://github.com/rejunity/tt08-vga-drop/blob/main/gist/vga_playground.v
 
 module tt_um_vga_example(input `W clk,input `W rst_n,output `W[7:0] uo_out);
 
