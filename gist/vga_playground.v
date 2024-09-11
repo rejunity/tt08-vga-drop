@@ -1,6 +1,16 @@
 /*
- * Copyright (c) 2024 Renaldas Zioma
- * based on the VGA examples by Uri Shaked
+ * "Drop" ASIC audio/visual demo. No CPU, no GPU, no RAM!
+ * Racing the beam and straight to VGA 640x480.
+ * Entry to Tiny Tapeout Demoscene 2024 competition:
+ *   https://tinytapeout.com/competitions/demoscene/
+ *
+ * Full version: https://github.com/rejunity/tt08-vga-drop
+ * VGA video recording: https://youtu.be/jJBU0J2ceMM
+ * Live recording from FPGA: https://youtu.be/rCupc2soGqo
+ *
+ * Copyright (c) 2024 Renaldas Zioma, Erik Hemming and Matthias Kampa
+ * Code is based on the VGA examples by Uri Shaked
+ * Inspired by "Memories" 256b demo by Desire
  * SPDX-License-Identifier: Apache-2.0
  */
 
@@ -23,11 +33,8 @@ module tt_um_vga_example(
   wire [1:0] R;
   wire [1:0] G;
   wire [1:0] B;
-  wire video_active;
-  wire [9:0] pix_x;
-  wire [9:0] pix_y;
 
-  // TinyVGA PMOD
+  // TinyVGA PMOD https://github.com/mole99/tiny-vga
   assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
 
   // Unused outputs assigned to 0.
@@ -39,8 +46,7 @@ module tt_um_vga_example(
 
   wire [9:0] x;
   wire [9:0] y;
-  wire video_active;
-  
+  wire video_active;  
   hvsync_generator hvsync_gen(
     .clk(clk),
     .reset(~rst_n),
@@ -60,15 +66,15 @@ module tt_um_vga_example(
   wire signed [9:0] frame = frame_counter[6:0];
   wire signed [9:0] offset_x = frame/2; 
   wire signed [9:0] offset_y = frame; 
-  wire signed [9:0] center_x = 10'sd320+offset_x;
-  wire signed [9:0] center_y = 10'sd240+offset_y;
+  wire signed [9:0] center_x = 320+offset_x;
+  wire signed [9:0] center_y = 240+offset_y;
   wire signed [9:0] p_x = x - center_x;
   wire signed [9:0] p_y = y - center_y + (beats_1_3 & part==6)*(envelopeB>>1)
                                        + (beats_1_3 & part==1)*(16-envelopeB>>1);
 
-  reg signed [17:0] r1;                                               // was 23 bit
-  reg signed [18:0] r2;                                               // was 23 bit
-  wire signed [19:0] r = 2*(r1 - center_y*2) + r2 - center_x*2 + 2;   // was 23 bit
+  reg signed [17:0] r1;
+  reg signed [18:0] r2;
+  wire signed [19:0] r = 2*(r1 - center_y*2) + r2 - center_x*2 + 2;
 
   reg signed [13:0] title_r;
   reg [5:0] title_r_pixels_in_scanline;
@@ -119,24 +125,22 @@ module tt_um_vga_example(
   end
 
   wire signed [22:0] dot = (r * (128-frame)) >> (9+((frame[6:4]+1)>>1) );  // zoom on snare
-  wire [7:0] pp_x = dot;
-  wire [7:0] pp_y = dot;
+  wire [15:0] dot_sq = dot[7:0] * dot[7:0];
 
   wire zoom_mode = part == 5 | part == 6;
-  wire signed [22:0] dot2 = ((pp_x * pp_x) * frame) >> (15 - 2*zoom_mode);
-  wire [7:0] ppp_x = dot2;
+  wire signed [22:0] dot2 = (dot_sq * frame) >> (15 - 2*zoom_mode);
 
   // mode A: enables drop with different angle, otherwise tunnel
-  wire mode_a = part == 0 | part == 1 | part == 2 | part == 5;//frame_counter[8];
+  wire mode_a = part == 0 | part == 1 | part == 2 | part == 5;
   // mode B: enables drop and starting close
-  wire mode_b = part == 0 | part == 4;//frame_counter[7]^frame_counter[8];
-  wire [7:0] p_p =          p_y*mode_a - p_x/2*mode_a +
+  wire mode_b = part == 0 | part == 4;
+  wire [7:0] stripes =   p_y*mode_a - p_x/2*mode_a +
                             p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1)*mode_b;
 
-  wire fractal_mode = part == 1 | part == 6;//frame_counter[8:7] == 2;
-  wire [7:0] ppp_y = fractal_mode? 
-                      -(y & 8'h7f & p_x) + (r>>11):
-                        dot2 + p_p;
+  wire fractal_mode = part == 1 | part == 6;
+  wire [7:0] out = fractal_mode? 
+                    -(y & 8'h7f & p_x) + (r>>11):
+                    dot2 + stripes;
 
   // generate title pixels
   wire ringR = y[9:7] == 3'b010 & |x[9:7] & (x[6:0] < title_r_pixels_in_scanline) &
@@ -158,16 +162,16 @@ module tt_um_vga_example(
   // 7: title+tunnel
 
 wire [2:0] part = frame_counter[9-:3];
-  assign {R,G,B} =
-    (~video_active) ? 6'b00_00_00 :
-    (part == 0) ? { &ppp_y[5:3] | title ? 6'b111_111 : 6'b0 } :                     // title + wakes
-    (part == 1) ? { &ppp_y[5:2] * ppp_y[1-:2], &ppp_y[6:0] * ppp_y[1-:2], 2'b00 } : // red/golden serpinsky
-    (part == 3) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } :             // tunnel
-    (part == 4) ? { &ppp_y[6:4] * 6'b110000 | &ppp_y[6:3]*dot[7]*6'b000010 } :      // red wakes
-    (part == 6) ? { ppp_y[7-:2], ppp_y[6-:2], ppp_y[5-:2] } :                       // multi-color serpinsky
-    (part == 7) ? { |ppp_y[7:6] ? {4'b11_00, dot[6:5]} : ppp_y[5:4] } |
-                  { 6{title & (frame_counter[6:0] >= 96) }  } :                     // title + tunnel                            // title + tunnel
-                  { ppp_y[7-:2], ppp_y[7-:2], ppp_y[7-:2] } | {4'b0,~ppp_x[6-:2]};
+assign {R,G,B} =
+  (~video_active) ? 6'b00_00_00 :
+  (part == 0) ? { &out[5:3] | title ? 6'b11_11_11 : 6'b00_00_00 } :           // title + wakes
+  (part == 1) ? { &out[5:2] * out[1-:2], &out[6:0] * out[1-:2], 2'b00 } :     // red/golden serpinsky
+  (part == 3) ? { |out[7:6] ? {4'b11_00, dot[6:5]} : out[5:4] } :             // tunnel
+  (part == 4) ? { &out[6:4] * 6'b11_00_00 | &out[6:3]*dot[7]*6'b00_00_10 } :  // red wakes
+  (part == 6) ? { out[7-:2], out[6-:2], out[5-:2] } :                         // multi-color serpinsky
+  (part == 7) ? { |out[7:6] ? {4'b11_00, dot[6:5]} : out[5:4] } |
+                { 6{title & (frame_counter[6:0] >= 96) }  } :                 // title + tunnel                            // title + tunnel
+                { out[7-:2], out[7-:2], out[7-:2] } | {4'b0,~dot[6-:2]};
 
   reg [11:0] frame_counter;
   reg frame_counter_frac;
