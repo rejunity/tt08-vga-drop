@@ -151,14 +151,14 @@ module tt_um_rejunity_vga_test01 (
 
   wire hsync;
   wire vsync;
-
-  wire video_active;
-  wire [9:0] x;
-  wire [9:0] y;
   wire [1:0] R;
   wire [1:0] G;
   wire [1:0] B;
   wire audio;
+
+  wire [9:0] x;
+  wire [9:0] y;
+  wire video_active;
 
   hvsync_generator hvsync_gen(
     .clk(clk),
@@ -231,6 +231,15 @@ module tt_um_rejunity_vga_test01 (
       end
     end
   end
+
+  // (x^2 + y^2)*(128-frame) / 512 // >> (9+frame[6:5]);
+  // (x^2 + y^2)*(128-frame) / 1024
+  // (x^2 + y^2)*(128-frame) / 2048
+  // (x^2 + y^2)*(128-frame) / 4096
+
+  // x*x*(128-frame)/f + y*y*(128-frame)/f
+  // (x+1)*(x+1)*(128-frame)/f
+  // x^2*(128-frame)/f + 2*x*(128-frame)/f + (128-frame)/f
 
   // wire signed [22:0] dot = ((p_x * p_x + p_y * p_y*2) * (128-frame)) >> (9+frame[6:5]);
   // wire signed [22:0] dot = (r * (128-frame)) >> (9+frame[6:5]);
@@ -364,23 +373,6 @@ wire [2:0] part = frame_counter[9-:3];
   wire [3:0] note_in = timer[7-:4];           // 8 notes, 32 frames per note each. 256 frames total, ~4 seconds
   always @(note_in)
   case(note_in)
-      // 4'd0 : note_freq = 8'd151;
-      // 4'd1 : note_freq = 8'd26;
-      // 4'd2 : note_freq = 8'd40;
-      // 4'd3 : note_freq = 8'd60;
-      // 4'd4 : note_freq = 8'd90;
-      // 4'd5 : note_freq = 8'd143;
-      // 4'd6 : note_freq = 8'd23;
-      // 4'd7 : note_freq = 8'd35;
-      // 4'd8 : note_freq = 8'd151;
-      // 4'd9 : note_freq = 8'd23;
-      // 4'd10: note_freq = 8'd35;
-      // 4'd11: note_freq = 8'd151;
-      // 4'd12: note_freq = 8'd143;
-      // 4'd13: note_freq = 8'd151;
-      // 4'd14: note_freq = 8'd40;
-      // 4'd15: note_freq = 8'd60;
-
       4'd0 : note_freq = `E2
       4'd1 : note_freq = `E3
       4'd2 : note_freq = `D3
@@ -397,37 +389,11 @@ wire [2:0] part = frame_counter[9-:3];
       4'd13: note_freq = `E3
       4'd14: note_freq = `Fs2
       4'd15: note_freq = `E3
-
-      // 4'd0 : note_freq = `B2
-      // 4'd1 : note_freq = `B3
-      // 4'd2 : note_freq = `A3
-      // 4'd3 : note_freq = `B3
-      // 4'd4 : note_freq = `E2
-      // 4'd5 : note_freq = `Fs2
-      // 4'd6 : note_freq = `A3
-      // 4'd7 : note_freq = `B3
-      // 4'd8 : note_freq = `B2
-      // 4'd9 : note_freq = `B3
-      // 4'd10: note_freq = `A3
-      // 4'd11: note_freq = `B3
-      // 4'd12: note_freq = `D2
-      // 4'd13: note_freq = `B3
-      // 4'd14: note_freq = `Cs2
-      // 4'd15: note_freq = `B3
   endcase
 
   wire [2:0] note2_in = timer[8-:3];           // 8 notes, 32 frames per note each. 256 frames total, ~4 seconds
   always @(note2_in)
   case(note2_in)
-      // 3'd0 : note2_freq = `E1
-      // 3'd1 : note2_freq = `D2
-      // 3'd2 : note2_freq = `A1
-      // 3'd3 : note2_freq = `D2
-      // 3'd4 : note2_freq = `E1
-      // 3'd5 : note2_freq = `D2
-      // 3'd6 : note2_freq = `G1
-      // 3'd7 : note2_freq = `Fs1
-
       3'd0 : note2_freq = `B1
       3'd1 : note2_freq = `A2
       3'd2 : note2_freq = `E1
@@ -443,9 +409,6 @@ wire [2:0] part = frame_counter[9-:3];
   wire snare  = noise      & (x >= 128 && x < 128+envelopeB*4);   // noise with half second envelope
   wire lead   = note       & (x >= 256 && x < 256+envelopeB*8);   // ROM square wave with quarter second envelope
   wire base   = note2      & (x >= 512 && x < ((beats_1_3)?(512+8*4):(512+32*4)));  
-  // wire snare  = noise      & (x[5] & x[4:0] < envelopeB/2); // noise with half second envelope
-  // wire lead   = note       & (x[6] & x[5:0] < envelopeB); // ROM square wave with quarter second envelope
-  // wire base   = note2      & (x[7] & ((beats_1_3)?(~|x[6:3]):(~|x[6:5])));  
   assign audio = { kick | (snare & beats_1_3 & part != 0) | (base) | (lead & part > 2) };
 
 
@@ -488,15 +451,8 @@ wire [2:0] part = frame_counter[9-:3];
           noise_counter <= noise_counter + 1'b1;
       end
 
-      // if (~timer[3])
-      //   note2_freq <= note_freq << 2;
-
       // square wave
       if (x == 0) begin
-        // if (note)
-        //   base_counter <= base_counter + 1'b1;
-
-        // if (note_counter > (note_freq>>timer[3])) begin 
         if (note_counter > note_freq) begin
           note_counter <= 0;
           note <= ~note;
@@ -517,7 +473,9 @@ wire [2:0] part = frame_counter[9-:3];
 
   // TinyVGA PMOD
   assign uo_out = VIDEO_OUT;//{hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
+  // assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
   // TinyAudio PMOD
   assign uio_out = AUDIO_OUT;//{8{audio}};
+  // assign uio_out = {8{audio}};
 
 endmodule
