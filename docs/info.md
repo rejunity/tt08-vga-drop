@@ -9,12 +9,12 @@ You can also include images in this folder and reference them in the markdown. E
 
 ## How it works
 
-VGA signal generator
+Compressed VGA Logo
 
 ## How to test
 
-We are learning how VGA and Sky130 works here
+Connect to VGA monitor and run it!
 
 ## External hardware
 
-VGA PMOD
+TinyVGA PMOD, VGA monitor
