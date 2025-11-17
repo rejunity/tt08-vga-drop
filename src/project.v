@@ -5,7 +5,7 @@
 
 `default_nettype none
 
-`define REGISTER_OUTPUTS 1
+// `define REGISTER_OUTPUTS
 
 `define C1	481; // 32.70375 Hz 
 `define Cs1	454; // 34.6475 Hz 
