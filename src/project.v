@@ -5,6 +5,8 @@
 
 `default_nettype none
 
+`define REGISTER_OUTPUTS 1
+
 `define C1	481; // 32.70375 Hz 
 `define Cs1	454; // 34.6475 Hz 
 `define D1	429; // 36.7075 Hz 
@@ -471,11 +473,13 @@ wire [2:0] part = frame_counter[9-:3];
   end
   
 
-  // TinyVGA PMOD
-  assign uo_out = VIDEO_OUT;//{hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
-  // assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
-  // TinyAudio PMOD
-  assign uio_out = AUDIO_OUT;//{8{audio}};
-  // assign uio_out = {8{audio}};
+  // TinyVGA & TinyAudio PMODs
+  `ifdef REGISTER_OUTPUTS
+    assign uo_out = VIDEO_OUT;
+    assign uio_out = AUDIO_OUT;
+  `else
+    assign uo_out = {hsync, B[0], G[0], R[0], vsync, B[1], G[1], R[1]};
+    assign uio_out = {8{audio}};
+  `endif
 
 endmodule
