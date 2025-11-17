@@ -12,7 +12,7 @@ async def test_project(dut):
 
     # Set the clock period to 10 us (100 KHz)
     #clock = Clock(dut.clk, 1000_000//25_200, units="ps")
-    clock = Clock(dut.clk, 40, units="ns")
+    clock = Clock(dut.clk, 40, unit="ns")
     cocotb.start_soon(clock.start())
 
     # Reset
