@@ -19,6 +19,8 @@
   "//": "The value is in nanoseconds, so 40ns == 25MHz.",
   "CLOCK_PERIOD": 40,
 
+  "SYNTH_STRATEGY": "DELAY 0",
+
   "//": "Hold slack margin - Increase them in case you are getting hold violations.",
   "PL_RESIZER_HOLD_SLACK_MARGIN": 0.1,
   "GRT_RESIZER_HOLD_SLACK_MARGIN": 0.05,
