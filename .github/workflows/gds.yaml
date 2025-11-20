@@ -14,7 +14,7 @@ jobs:
           submodules: recursive
 
       - name: Build GDS
-        uses: TinyTapeout/tt-gds-action@ttgf0p2
+        uses: rejunity/tt-gds-action-gf180mcu_fd_sc_mcu9t5v0@ttgf0p2_9t
         with:
           pdk: gf180mcuD
 
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Run Tiny Tapeout Precheck
-        uses: TinyTapeout/tt-gds-action/precheck@ttgf0p2
+        uses: rejunity/tt-gds-action-gf180mcu_fd_sc_mcu9t5v0/precheck@ttgf0p2_9t
 
   gl_test:
     needs: gds
@@ -35,7 +35,7 @@ jobs:
           submodules: recursive
 
       - name: GL test
-        uses: TinyTapeout/tt-gds-action/gl_test@ttgf0p2
+        uses: rejunity/tt-gds-action-gf180mcu_fd_sc_mcu9t5v0/gl_test@ttgf0p2_9t
 
   viewer:
     needs: gds
@@ -44,4 +44,4 @@ jobs:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source
     steps:
-      - uses: TinyTapeout/tt-gds-action/viewer@ttgf0p2
+      - uses: rejunity/tt-gds-action-gf180mcu_fd_sc_mcu9t5v0/viewer@ttgf0p2_9t
