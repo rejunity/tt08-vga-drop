@@ -21,7 +21,9 @@
 
   "//": "Original: gf180mcu_fd_sc_mcu7t5v0",
   "STD_CELL_LIBRARY": "gf180mcu_fd_sc_mcu9t5v0",
-  "PNR_EXCLUDED_CELL_FILE": "$PDK_ROOT/libs.tech/librelane/gf180mcu_fd_sc_mcu7t5v0/pnr_exclude.cells",
+  "DRC_EXCLUDE_CELL_LIST": "$PDK_ROOT/libs.tech/librelane/gf180mcu_fd_sc_mcu9t5v0/pnr_exclude.cells",
+  "//": "PNR_EXCLUDED_CELL_FILE: $PDK_ROOT/libs.tech/librelane/gf180mcu_fd_sc_mcu9t5v0/pnr_exclude.cells",
+
 
   "//": "Hold slack margin - Increase them in case you are getting hold violations.",
   "PL_RESIZER_HOLD_SLACK_MARGIN": 0.1,
