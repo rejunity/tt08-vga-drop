@@ -245,8 +245,8 @@ module tt_um_rejunity_vga_test01 (
   // wire signed [22:0] dot = (r * (128-frame)) >> (9+frame[6:5]);
   wire signed [22:0] dot__t = (r * (128-frame)) >> (9+((frame[6:4]+1)>>1) );  // zoom on snare
   // wire signed [22:0] dot = (r * (128-frame)) >> (9+(frame[6:4]-(~frame[4])));  // zoom on snare
-  wire [7:0] pp_x = dot__t;
-  wire [7:0] pp_y = dot__t;
+  wire [7:0] pp_x = dot;// deeper pipelining (was: dot__t)
+  wire [7:0] pp_y = dot;// deeper pipelining (was: dot__t)
 
   wire zoom_mode = part == 5 | part == 6; ////(frame_counter[7] & frame_counter[8]);
   // wire signed [22:0] dot2 = ((pp_x * pp_x * 8) * frame) >> (18 - 2*zoom_mode);
@@ -257,21 +257,23 @@ module tt_um_rejunity_vga_test01 (
   wire mode_a = part == 0 | part == 1 | part == 2 | part == 5;//frame_counter[8];
   // B: enables drop and starting close
   wire mode_b = part == 0 | part == 4;//frame_counter[7]^frame_counter[8];
-  wire [7:0] p_p =          p_y*mode_a - p_x/2*mode_a +
+  wire [7:0] p_p__t =          p_y*mode_a - p_x/2*mode_a +
                             p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1)*mode_b;
 
   wire fractal_mode = part == 1 | part == 6;//frame_counter[8:7] == 2;
   wire [7:0] ppp_y__t = fractal_mode? 
                       -(y & 8'h7f & p_x) + (r>>11):
-                        dot2 + p_p;
+                        ppp_x + p_p; // deeper pipelining (was: dot2 + p_p__t)
 
   reg [7:0] ppp_y;
   reg [7:0] ppp_x;
+  reg [7:0] p_p;
   reg signed [22:0] dot;
   always @(posedge clk) begin
     ppp_x <= ppp_x__t;
     ppp_y <= ppp_y__t;
     dot   <= dot__t;
+    p_p   <= p_p__t;
   end
 
   // generate title pixels
