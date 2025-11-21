@@ -248,16 +248,18 @@ module tt_um_rejunity_vga_test01 (
   wire [7:0] pp_x = dot;// deeper pipelining (was: dot__t)
   wire [7:0] pp_y = dot;// deeper pipelining (was: dot__t)
 
+  wire [15:0] pp_x_sq__t = pp_x * pp_x;
+
   wire zoom_mode = part == 5 | part == 6; ////(frame_counter[7] & frame_counter[8]);
   // wire signed [22:0] dot2 = ((pp_x * pp_x * 8) * frame) >> (18 - 2*zoom_mode);
-  wire signed [22:0] dot2 = ((pp_x * pp_x) * frame) >> (15 - 2*zoom_mode);
+  wire signed [22:0] dot2 = (pp_x_sq * frame) >> (15 - 2*zoom_mode);
   wire [7:0] ppp_x__t = dot2;
 
   // A: enables drop with different angle, otherwise tunnel
   wire mode_a = part == 0 | part == 1 | part == 2 | part == 5;//frame_counter[8];
   // B: enables drop and starting close
   wire mode_b = part == 0 | part == 4;//frame_counter[7]^frame_counter[8];
-  wire [7:0] p_p__t =          p_y*mode_a - p_x/2*mode_a +
+  wire [7:0] p_p__t =       p_y*mode_a - p_x/2*mode_a +
                             p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1)*mode_b;
 
   wire fractal_mode = part == 1 | part == 6;//frame_counter[8:7] == 2;
@@ -265,11 +267,13 @@ module tt_um_rejunity_vga_test01 (
                       -(y & 8'h7f & p_x) + (r>>11):
                         ppp_x + p_p; // deeper pipelining (was: dot2 + p_p__t)
 
+  reg [15:0] pp_x_sq;
   reg [7:0] ppp_y;
   reg [7:0] ppp_x;
   reg [7:0] p_p;
   reg signed [22:0] dot;
   always @(posedge clk) begin
+    pp_x_sq <= pp_x_sq__t;
     ppp_x <= ppp_x__t;
     ppp_y <= ppp_y__t;
     dot   <= dot__t;
