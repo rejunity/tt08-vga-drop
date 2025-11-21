@@ -184,7 +184,7 @@ module tt_um_rejunity_vga_test01 (
 
   reg signed [17:0] r1;                                               // was 23 bit
   reg signed [18:0] r2;                                               // was 23 bit
-  wire signed [19:0] r = 2*(r1 - center_y*2) + r2 - center_x*2 + 2;   // was 23 bit
+  wire signed [19:0] r__t = 2*(r1 - center_y*2) + r2 - center_x*2 + 2;// was 23 bit
 
   reg signed [13:0] title_r;
   reg [5:0] title_r_pixels_in_scanline;
@@ -250,7 +250,7 @@ module tt_um_rejunity_vga_test01 (
   wire [7:0] pp_x = dot;// deeper pipelining (was: dot__t)
   wire [7:0] pp_y = dot;// deeper pipelining (was: dot__t)
 
-  wire [15:0] pp_x_sq__t = pp_x * pp_x;
+  wire [15:0] pp_x_sq__t = pp_x * pp_x; // even deeper pipelining (was: pp_x_sq = pp_x * pp_x)
 
   wire zoom_mode = part == 5 | part == 6; ////(frame_counter[7] & frame_counter[8]);
   // wire signed [22:0] dot2 = ((pp_x * pp_x * 8) * frame) >> (18 - 2*zoom_mode);
@@ -269,17 +269,19 @@ module tt_um_rejunity_vga_test01 (
                       -(y & 8'h7f & p_x) + (r>>11):
                         ppp_x + p_p; // deeper pipelining (was: dot2 + p_p__t)
 
+  reg signed [19:0] r;
   reg [15:0] pp_x_sq;
   reg [7:0] ppp_y;
   reg [7:0] ppp_x;
   reg [7:0] p_p;
   reg signed [22:0] dot;
   always @(posedge clk) begin
+    r       <= r__t;
     pp_x_sq <= pp_x_sq__t;
-    ppp_x <= ppp_x__t;
-    ppp_y <= ppp_y__t;
-    dot   <= dot__t;
-    p_p   <= p_p__t;
+    ppp_x   <= ppp_x__t;
+    ppp_y   <= ppp_y__t;
+    dot     <= dot__t;
+    p_p     <= p_p__t;
   end
 
   // generate title pixels
