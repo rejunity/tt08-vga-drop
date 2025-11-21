@@ -5,66 +5,66 @@
 
 `default_nettype none
 
-`define C1	481; // 32.70375 Hz 
-`define Cs1	454; // 34.6475 Hz 
-`define D1	429; // 36.7075 Hz 
-`define Ds1	405; // 38.89125 Hz 
-`define E1	382; // 41.20375 Hz 
-`define F1	360; // 43.65375 Hz 
-`define Fs1	340; // 46.24875 Hz 
-`define G1	321; // 49.0 Hz 
-`define Gs1	303; // 51.9125 Hz 
-`define A1	286; // 55.0 Hz 
-`define As1	270; // 58.27 Hz 
-`define B1	255; // 61.735 Hz 
-`define C2	241; // 65.4075 Hz 
-`define Cs2	227; // 69.295 Hz 
-`define D2	214; // 73.415 Hz 
-`define Ds2	202; // 77.7825 Hz 
-`define E2	191; // 82.4075 Hz 
-`define F2	180; // 87.3075 Hz 
-`define Fs2	170; // 92.4975 Hz 
-`define G2	161; // 98.0 Hz 
-`define Gs2	152; // 103.825 Hz 
-`define A2	143; // 110.0 Hz 
-`define As2	135; // 116.54 Hz 
-`define B2	127; // 123.47 Hz 
-`define C3	120; // 130.815 Hz 
-`define Cs3	114; // 138.59 Hz 
-`define D3	107; // 146.83 Hz 
-`define Ds3	101; // 155.565 Hz 
-`define E3	95; // 164.815 Hz 
-`define F3	90; // 174.615 Hz 
-`define Fs3	85; // 184.995 Hz 
-`define G3	80; // 196.0 Hz 
-`define Gs3	76; // 207.65 Hz 
-`define A3	72; // 220.0 Hz 
-`define As3	68; // 233.08 Hz 
-`define B3	64; // 246.94 Hz 
-`define C4	60; // 261.63 Hz 
-`define Cs4	57; // 277.18 Hz 
-`define D4	54; // 293.66 Hz 
-`define Ds4	51; // 311.13 Hz 
-`define E4	48; // 329.63 Hz 
-`define F4	45; // 349.23 Hz 
-`define Fs4	43; // 369.99 Hz 
-`define G4	40; // 392.0 Hz 
-`define Gs4	38; // 415.3 Hz 
-`define A4	36; // 440.0 Hz 
-`define As4	34; // 466.16 Hz 
-`define B4	32; // 493.88 Hz 
-`define C5	30; // 523.26 Hz 
-`define Cs5	28; // 554.36 Hz 
-`define D5	27; // 587.32 Hz 
-`define Ds5	25; // 622.26 Hz 
-`define E5	24; // 659.26 Hz 
-`define F5	23; // 698.46 Hz 
-`define Fs5	21; // 739.98 Hz 
-`define G5	20; // 784.0 Hz 
-`define Gs5	19; // 830.6 Hz 
-`define A5	18; // 880.0 Hz 
-`define As5	17; // 932.32 Hz 
-`define B5	16; // 987.76 Hz 
+`define C1  481; // 32.70375 Hz 
+`define Cs1 454; // 34.6475 Hz 
+`define D1  429; // 36.7075 Hz 
+`define Ds1 405; // 38.89125 Hz 
+`define E1  382; // 41.20375 Hz 
+`define F1  360; // 43.65375 Hz 
+`define Fs1 340; // 46.24875 Hz 
+`define G1  321; // 49.0 Hz 
+`define Gs1 303; // 51.9125 Hz 
+`define A1  286; // 55.0 Hz 
+`define As1 270; // 58.27 Hz 
+`define B1  255; // 61.735 Hz 
+`define C2  241; // 65.4075 Hz 
+`define Cs2 227; // 69.295 Hz 
+`define D2  214; // 73.415 Hz 
+`define Ds2 202; // 77.7825 Hz 
+`define E2  191; // 82.4075 Hz 
+`define F2  180; // 87.3075 Hz 
+`define Fs2 170; // 92.4975 Hz 
+`define G2  161; // 98.0 Hz 
+`define Gs2 152; // 103.825 Hz 
+`define A2  143; // 110.0 Hz 
+`define As2 135; // 116.54 Hz 
+`define B2  127; // 123.47 Hz 
+`define C3  120; // 130.815 Hz 
+`define Cs3 114; // 138.59 Hz 
+`define D3  107; // 146.83 Hz 
+`define Ds3 101; // 155.565 Hz 
+`define E3  95; // 164.815 Hz 
+`define F3  90; // 174.615 Hz 
+`define Fs3 85; // 184.995 Hz 
+`define G3  80; // 196.0 Hz 
+`define Gs3 76; // 207.65 Hz 
+`define A3  72; // 220.0 Hz 
+`define As3 68; // 233.08 Hz 
+`define B3  64; // 246.94 Hz 
+`define C4  60; // 261.63 Hz 
+`define Cs4 57; // 277.18 Hz 
+`define D4  54; // 293.66 Hz 
+`define Ds4 51; // 311.13 Hz 
+`define E4  48; // 329.63 Hz 
+`define F4  45; // 349.23 Hz 
+`define Fs4 43; // 369.99 Hz 
+`define G4  40; // 392.0 Hz 
+`define Gs4 38; // 415.3 Hz 
+`define A4  36; // 440.0 Hz 
+`define As4 34; // 466.16 Hz 
+`define B4  32; // 493.88 Hz 
+`define C5  30; // 523.26 Hz 
+`define Cs5 28; // 554.36 Hz 
+`define D5  27; // 587.32 Hz 
+`define Ds5 25; // 622.26 Hz 
+`define E5  24; // 659.26 Hz 
+`define F5  23; // 698.46 Hz 
+`define Fs5 21; // 739.98 Hz 
+`define G5  20; // 784.0 Hz 
+`define Gs5 19; // 830.6 Hz 
+`define A5  18; // 880.0 Hz 
+`define As5 17; // 932.32 Hz 
+`define B5  16; // 987.76 Hz 
 
 /*
 Video sync generator, used to drive a VGA monitor.
@@ -243,15 +243,15 @@ module tt_um_rejunity_vga_test01 (
 
   // wire signed [22:0] dot = ((p_x * p_x + p_y * p_y*2) * (128-frame)) >> (9+frame[6:5]);
   // wire signed [22:0] dot = (r * (128-frame)) >> (9+frame[6:5]);
-  wire signed [22:0] dot = (r * (128-frame)) >> (9+((frame[6:4]+1)>>1) );  // zoom on snare
+  wire signed [22:0] dot__t = (r * (128-frame)) >> (9+((frame[6:4]+1)>>1) );  // zoom on snare
   // wire signed [22:0] dot = (r * (128-frame)) >> (9+(frame[6:4]-(~frame[4])));  // zoom on snare
-  wire [7:0] pp_x = dot;
-  wire [7:0] pp_y = dot;
+  wire [7:0] pp_x = dot__t;
+  wire [7:0] pp_y = dot__t;
 
   wire zoom_mode = part == 5 | part == 6; ////(frame_counter[7] & frame_counter[8]);
   // wire signed [22:0] dot2 = ((pp_x * pp_x * 8) * frame) >> (18 - 2*zoom_mode);
   wire signed [22:0] dot2 = ((pp_x * pp_x) * frame) >> (15 - 2*zoom_mode);
-  wire [7:0] ppp_x = dot2;
+  wire [7:0] ppp_x__t = dot2;
 
   // A: enables drop with different angle, otherwise tunnel
   wire mode_a = part == 0 | part == 1 | part == 2 | part == 5;//frame_counter[8];
@@ -261,9 +261,18 @@ module tt_um_rejunity_vga_test01 (
                             p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1)*mode_b;
 
   wire fractal_mode = part == 1 | part == 6;//frame_counter[8:7] == 2;
-  wire [7:0] ppp_y = fractal_mode? 
+  wire [7:0] ppp_y__t = fractal_mode? 
                       -(y & 8'h7f & p_x) + (r>>11):
                         dot2 + p_p;
+
+  reg [7:0] ppp_y;
+  reg [7:0] ppp_x;
+  reg signed [22:0] dot;
+  always @(posedge clk) begin
+    ppp_x <= ppp_x__t;
+    ppp_y <= ppp_y__t;
+    dot   <= dot__t;
+  end
 
   // generate title pixels
   // wire ringR = y[9:7] == 3'b010 & |x[9:7] & (x[6:0] < title_r_pixels_in_scanline) &
