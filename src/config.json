@@ -16,8 +16,8 @@
   "PL_TARGET_DENSITY_PCT": 60,
 
   "//": "CLOCK_PERIOD - Increase this in case you are getting setup time violations.",
-  "//": "The value is in nanoseconds, so 40ns == 25MHz.",
-  "CLOCK_PERIOD": 40,
+  "//": "The value is in nanoseconds, so 40ns == 25MHz and 39ns == 25.64 > 25.2MHz VGA pixel clock",
+  "CLOCK_PERIOD": 39,
 
   "STD_CELL_LIBRARY": "gf180mcu_fd_sc_mcu9t5v0",
 
