@@ -245,15 +245,15 @@ module tt_um_rejunity_vga_test01 (
 
   // wire signed [22:0] dot = ((p_x * p_x + p_y * p_y*2) * (128-frame)) >> (9+frame[6:5]);
   // wire signed [22:0] dot = (r * (128-frame)) >> (9+frame[6:5]);
-  wire signed [22:0] dot = (r * (128-frame)) >> (9+((frame[6:4]+1)>>1) );  // zoom on snare
+  wire signed [22:0] dot__t = (r * (128-frame)) >> (9+((frame[6:4]+1)>>1) );  // zoom on snare
   // wire signed [22:0] dot = (r * (128-frame)) >> (9+(frame[6:4]-(~frame[4])));  // zoom on snare
-  wire [7:0] pp_x = dot;
-  wire [7:0] pp_y = dot;
+  wire [7:0] pp_x = dot__t;
+  wire [7:0] pp_y = dot__t;
 
   wire zoom_mode = part == 5 | part == 6; ////(frame_counter[7] & frame_counter[8]);
   // wire signed [22:0] dot2 = ((pp_x * pp_x * 8) * frame) >> (18 - 2*zoom_mode);
   wire signed [22:0] dot2 = ((pp_x * pp_x) * frame) >> (15 - 2*zoom_mode);
-  wire [7:0] ppp_x = dot2;
+  wire [7:0] ppp_x__t = dot2;
 
   // A: enables drop with different angle, otherwise tunnel
   wire mode_a = part == 0 | part == 1 | part == 2 | part == 5;//frame_counter[8];
@@ -263,9 +263,18 @@ module tt_um_rejunity_vga_test01 (
                             p_y*(frame[7:5]+1'd1)*mode_b - p_x*(frame[6:5]+1'd1)*mode_b;
 
   wire fractal_mode = part == 1 | part == 6;//frame_counter[8:7] == 2;
-  wire [7:0] ppp_y = fractal_mode? 
+  wire [7:0] ppp_y__t = fractal_mode? 
                       -(y & 8'h7f & p_x) + (r>>11):
                         dot2 + p_p;
+
+  reg [7:0] ppp_y;
+  reg [7:0] ppp_x;
+  reg signed [22:0] dot;
+  always @(posedge clk) begin
+    ppp_x <= ppp_x__t;
+    ppp_y <= ppp_y__t;
+    dot   <= dot__t;
+  end
 
   // generate title pixels
   // wire ringR = y[9:7] == 3'b010 & |x[9:7] & (x[6:0] < title_r_pixels_in_scanline) &
