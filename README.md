@@ -20,7 +20,7 @@ ReJ aka **Renaldas Zioma** -- code, design
 eriQue aka **Erik Hemming** -- music, design  
 **Matthias Kampa** -- prototype code, design
 
-## Recording from VGA monitor with Audio
+## Recording from the screen of VGA monitor with sound
 
 https://github.com/user-attachments/assets/ede47d77-f7b0-44df-af79-b9e3f9fc127f
 
