@@ -18,19 +18,19 @@ ReJ aka **Renaldas Zioma** -- code, design
 eriQue aka **Erik Hemming** -- music, design  
 **Matthias Kampa** -- prototype code, design
 
-## Recording from the screen of VGA monitor with sound
+## Recording from the screen of the VGA monitor
 
 https://github.com/user-attachments/assets/ede47d77-f7b0-44df-af79-b9e3f9fc127f
 
-## VGA signal capture with Audio
+## Direct VGA signal capture
 
 https://github.com/user-attachments/assets/4055923e-9adc-49b3-bb17-637b87bc0810
 
 ## Useful links
 
-* VGA PMOD [https://github.com/mole99/tiny-vga]
-* Audio PMOD (7th pin PWM) [https://github.com/MichaelBell/tt-audio-pmod?tab=readme-ov-file]
-* VGA timing [http://www.tinyvga.com/vga-timing/640x480@60Hz]
+* VGA PMOD https://github.com/mole99/tiny-vga
+* Audio PMOD https://github.com/MichaelBell/tt-audio-pmod
+* VGA timing http://www.tinyvga.com/vga-timing/640x480@60Hz
 
 # What is Tiny Tapeout?
 
@@ -44,4 +44,3 @@ To learn more and get started, visit https://tinytapeout.com.
 - [Digital design lessons](https://tinytapeout.com/digital_design/)
 - [Learn how semiconductors work](https://tinytapeout.com/siliwiz/)
 - [Join the community](https://tinytapeout.com/discord)
-- [Build your design locally](https://www.tinytapeout.com/guides/local-hardening/)
