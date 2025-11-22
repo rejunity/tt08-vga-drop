@@ -7,10 +7,12 @@
 
 # The "Drop" ASIC
 
-ASIC audio visual demo.
-No CPU, no GPU, no memory. Racing the beam and straight to VGA 640x480.
+ASIC audio visual demo in less than 4000 Logic Gates.
+No CPU, no GPU, no memory. Racing the beam straight to VGA 640x480.
 
 Entry to Tiny Tapeout Demoscene 2024 September competition: https://tinytapeout.com/competitions/demoscene/
+
+Taped out on [SKY130](https://github.com/rejunity/tt08-vga-drop/tree/sky130), [IHP130](https://github.com/rejunity/tt08-vga-drop/tree/ihp130) and *coming soon* [GF180](https://github.com/rejunity/tt08-vga-drop/tree/ttgf0p2).
 
 ## Credits
 
