@@ -1,0 +1,29 @@
+CAPI=2:
+
+name : ::drop:0
+
+filesets:
+  rtl:
+    files:
+      - src/project.v : {file_type : verilogSource}
+
+  icebreaker:
+    files:
+      - fpga/icebreaker.v : {file_type : verilogSource}
+      - fpga/icebreaker.pcf : {file_type : PCF}
+
+targets:
+  lint:
+    filesets: [rtl, icebreaker]
+    flow: lint
+    flow_options:
+      tool: verilator
+    toplevel : top
+    
+  icebreaker:
+    filesets: [rtl, icebreaker]
+    flow: icestorm
+    flow_options:
+      icetime_options: [-d, up5k, -mtr]
+      nextpnr_options : [--up5k, --freq, 12]
+    toplevel : top
